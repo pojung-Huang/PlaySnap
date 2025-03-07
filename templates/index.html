@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蛇麼玩意</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            padding: 1vh;
+            flex-shrink: 0;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2vw;
+            padding: 0 2vw;
+        }
+
+        .leaderboard {
+            width: 20vw;
+            height: 90vh;
+            background: white;
+            padding: 1.5vh 1vw;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .leaderboard h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 2vh;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1vh 0.5vw;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard-date {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+        }
+
+        .game-section {
+            display: flex;
+            gap: 2vw;
+            height: 90vh;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            height: 90vh;
+            width: calc(90vh * 4/3);
+            background-color: #000;
+            border: 2px solid #333;
+        }
+
+        .game-controls {
+            width: 15vw;
+            height: 90vh;
+            padding: 2vh 1vw;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #score {
+            font-size: 2.5vh;
+            margin-bottom: 2vh;
+            text-align: center;
+        }
+
+        .controls-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        button {
+            width: 100%;
+            padding: 1.5vh;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 2vh;
+            margin-top: 2vh;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>蛇麼玩意</h1>
+    <div class="container">
+        <div class="leaderboard">
+            <h2>排行榜</h2>
+            <ul class="leaderboard-list">
+                <li class="leaderboard-item">
+                    <div>
+                        <span>1. 玩家一</span>
+                        <span class="leaderboard-date">2024-03-07</span>
+                    </div>
+                    <span>100分</span>
+                </li>
+            </ul>
+        </div>
+        <div class="game-section">
+            <canvas id="gameCanvas"></canvas>
+            <div class="game-controls">
+                <div class="controls-content">
+                    <div>
+                        <div id="score">分數：<span id="scoreValue">0</span></div>
+                        <p>使用方向鍵控制蛇的移動</p>
+                    </div>
+                    <button onclick="startGame()">開始遊戲</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+</body>
+</html> 
