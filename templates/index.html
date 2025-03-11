@@ -63,6 +63,8 @@
             gap: 2vw;
             padding: 0 2vw;
             padding-bottom: 2vh; /* 底部間距 */
+            position: relative;
+            z-index: 1;
         }
 
         .leaderboard {
@@ -106,6 +108,8 @@
             gap: 2vw;
             height: 90vh;
             align-items: center;
+            position: relative;
+            z-index: 1;
         }
 
         .canvas-container {
@@ -152,7 +156,7 @@
             color: white;
             border: none;
             border-radius: 5px;
-            cursor: pointer;
+            cursor: pointer;    
             transition: background-color 0.3s;
         }
 
@@ -229,9 +233,20 @@
             transform: translateX(-50%);
             margin-bottom: 8px;
         }
+
+        .sakura-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;  /* 確保在遊戲畫面後面 */
+        }
     </style>
 </head>
 <body>
+    <div id="sakura-container" class="sakura-container"></div>
     <button class="title-button" oncontextmenu="return false">
         蛇麼玩意
     </button>
