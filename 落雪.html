@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>落雪效果</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+
+        #renderCanvas {
+            width: 100%;
+            height: 100vh;
+            touch-action: none;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
+        .sweep-button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .sweep-button:hover {
+            background: #45a049;
+        }
+
+        .static-element {
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <div class="controls">
+        <label>
+            <input type="checkbox" id="snowToggle" checked>
+            開啟下雪
+        </label>
+        <br>
+        <button class="sweep-button" id="sweepButton">除雪</button>
+    </div>
+    <div class="static-element" data-snow-collider>
+        在這裡會積雪
+    </div>
+
+    <script>
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+
+        // 設置相機
+        const camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 0, -10), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        // 創建粒子系統
+        const snowSystem = new BABYLON.ParticleSystem("snow", 3000, scene);
+        snowSystem.particleTexture = new BABYLON.Texture("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABCSURBVChTY/wPBAxkAMb///8zMJAJGEEuQAaEx0AGYEMu4OLiYoDRyACnAhgAKYApQNcMA1gVwAC6BmQAVwDzGQMDALuqKGm4Aq5NAAAAAElFTkSuQmCC");
+
+        // 設置粒子系統參數
+        snowSystem.emitter = new BABYLON.Vector3(0, 10, 0);
+        snowSystem.minEmitBox = new BABYLON.Vector3(-10, 0, -10);
+        snowSystem.maxEmitBox = new BABYLON.Vector3(10, 0, 10);
+
+        snowSystem.color1 = new BABYLON.Color4(1, 1, 1, 1);
+        snowSystem.color2 = new BABYLON.Color4(1, 1, 1, 1);
+        snowSystem.colorDead = new BABYLON.Color4(1, 1, 1, 0);
+
+        snowSystem.minSize = 0.1;
+        snowSystem.maxSize = 0.3;
+        snowSystem.minLifeTime = 1;
+        snowSystem.maxLifeTime = 3;
+        snowSystem.emitRate = 100;
+
+        snowSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+        snowSystem.direction1 = new BABYLON.Vector3(-1, -1, -1);
+        snowSystem.direction2 = new BABYLON.Vector3(1, -1, 1);
+
+        // 積雪效果
+        const colliders = document.querySelectorAll('[data-snow-collider]');
+        const snowLayers = new Map();
+
+        colliders.forEach(element => {
+            const rect = element.getBoundingClientRect();
+            const snow = document.createElement('div');
+            snow.style.cssText = `
+                position: absolute;
+                left: ${rect.left}px;
+                top: ${rect.top}px;
+                width: ${rect.width}px;
+                height: 0px;
+                background: white;
+                opacity: 0;
+                transition: all 0.5s ease;
+                pointer-events: none;
+            `;
+            document.body.appendChild(snow);
+            snowLayers.set(element, snow);
+        });
+
+        // 控制功能
+        document.getElementById('snowToggle').addEventListener('change', function (e) {
+            if (e.target.checked) {
+                snowSystem.start();
+                startSnowAccumulation();
+            } else {
+                snowSystem.stop();
+                stopSnowAccumulation();
+            }
+        });
+
+        document.getElementById('sweepButton').addEventListener('click', function () {
+            sweepSnow();
+        });
+
+        // 積雪動畫
+        let accumulationInterval;
+        function startSnowAccumulation() {
+            accumulationInterval = setInterval(() => {
+                snowLayers.forEach((snow, element) => {
+                    const currentHeight = parseFloat(snow.style.height) || 0;
+                    if (currentHeight < 20) { // 最大積雪高度
+                        snow.style.height = `${currentHeight + 0.5}px`;
+                        snow.style.opacity = Math.min((currentHeight + 0.5) / 20, 0.8);
+                    }
+                });
+            }, 1000);
+        }
+
+        function stopSnowAccumulation() {
+            clearInterval(accumulationInterval);
+        }
+
+        function sweepSnow() {
+            snowLayers.forEach(snow => {
+                snow.style.height = '0px';
+                snow.style.opacity = '0';
+            });
+        }
+
+        // 開始渲染
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+
+        // 響應視窗大小變化
+        window.addEventListener('resize', () => {
+            engine.resize();
+        });
+
+        // 初始啟動
+        snowSystem.start();
+        startSnowAccumulation();
+    </script>
+</body>
+
+</html>
