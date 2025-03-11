@@ -389,7 +389,7 @@ document.querySelector('.title-button').addEventListener('click', (e) => {
     }
 
     // 如果達到 5 次點擊
-    if (clickCount >= 10) {
+    if (clickCount >= 5) {
         endGame();
         clickCount = 0; // 重置計數器
         return;
@@ -398,7 +398,7 @@ document.querySelector('.title-button').addEventListener('click', (e) => {
     // 設置新的計時器，1.5 秒後重置計數
     clickTimer = setTimeout(() => {
         clickCount = 0;
-    }, 1000);
+    }, 1500);
 });
 
 // 移除原本的 onclick 事件

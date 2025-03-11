@@ -63,8 +63,6 @@
             gap: 2vw;
             padding: 0 2vw;
             padding-bottom: 2vh; /* 底部間距 */
-            position: relative;
-            z-index: 1;
         }
 
         .leaderboard {
@@ -108,8 +106,6 @@
             gap: 2vw;
             height: 90vh;
             align-items: center;
-            position: relative;
-            z-index: 1;
         }
 
         .canvas-container {
@@ -233,9 +229,32 @@
             transform: translateX(-50%);
             margin-bottom: 8px;
         }
+
+        .sakura {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            animation: fall linear;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--endX), var(--endY)) rotate(360deg);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
+    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
+        <label style="background: rgba(255,255,255,0.8); padding: 5px; border-radius: 5px;">
+            <input type="checkbox" id="sakuraToggle" checked> 櫻吹雪
+        </label>
+    </div>
     <div id="sakura-container" class="sakura-container"></div>
     <button class="title-button" oncontextmenu="return false">
         蛇麼玩意
@@ -292,5 +311,67 @@
     </div>
 
     <script src="{{ url_for('static', filename='game.js') }}"></script>
+    <script>
+    class SakuraEffect {
+        constructor() {
+            this.active = true;
+            this.gameArea = document.getElementById('gameCanvas').getBoundingClientRect();
+            this.animate = this.animate.bind(this);
+            this.createSakura = this.createSakura.bind(this);
+            
+            document.getElementById('sakuraToggle').addEventListener('change', (e) => {
+                this.active = e.target.checked;
+            });
+
+            this.animate();
+        }
+
+        createSakura() {
+            if (!this.active) return;
+
+            const sakura = document.createElement('div');
+            sakura.className = 'sakura';
+            sakura.textContent = '🌸';
+            sakura.style.fontSize = Math.random() * 10 + 10 + 'px';
+
+            // 避開遊戲區域
+            let startX;
+            if (Math.random() < 0.5) {
+                startX = Math.random() * (this.gameArea.left - 20);
+            } else {
+                startX = this.gameArea.right + Math.random() * (window.innerWidth - this.gameArea.right - 20);
+            }
+
+            sakura.style.left = startX + 'px';
+            sakura.style.top = '-20px';
+
+            const endX = (Math.random() - 0.5) * 200;
+            const endY = window.innerHeight + 20;
+            const duration = Math.random() * 3 + 4;
+
+            sakura.style.setProperty('--endX', `${endX}px`);
+            sakura.style.setProperty('--endY', `${endY}px`);
+            sakura.style.animationDuration = `${duration}s`;
+
+            document.body.appendChild(sakura);
+
+            sakura.addEventListener('animationend', () => {
+                sakura.remove();
+            });
+        }
+
+        animate() {
+            if (this.active && Math.random() < 0.2) {
+                this.createSakura();
+            }
+            requestAnimationFrame(this.animate);
+        }
+    }
+
+    // 在頁面加載完成後初始化櫻吹雪效果
+    document.addEventListener('DOMContentLoaded', () => {
+        new SakuraEffect();
+    });
+    </script>
 </body>
 </html> 
