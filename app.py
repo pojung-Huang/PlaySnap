@@ -26,7 +26,7 @@ def init_db():
         if not Score.query.first():
             # 添加一些測試分數
             test_scores = [
-                Score(name="GOD", score=999999999),
+                Score(name="k8s", score=999999999),
                 # Score(name="測試玩家", score=80),
                 # Score(name="測試玩家", score=60)
             ]
