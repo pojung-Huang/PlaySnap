@@ -367,7 +367,7 @@ function endGame() {
         // 顯示分數
         ctx.font = '24px Arial';
         ctx.fillText(`最終分數：${score}`, canvas.width / 2, canvas.height / 2 + 50);
-
+        submitScore(score);
         // 重置遊戲狀態
         snake = null;
         food = null;
@@ -403,3 +403,139 @@ document.querySelector('.title-button').addEventListener('click', (e) => {
 
 // 移除原本的 onclick 事件
 document.querySelector('.title-button').removeAttribute('onclick');
+
+// 修改櫻花效果的實現，確保與遊戲邏輯完全分離
+class SakuraEffect {
+    constructor() {
+        // 創建獨立的容器
+        this.container = document.createElement('div');
+        this.container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        `;
+        document.body.appendChild(this.container);
+
+        // 獲取遊戲區域
+        this.gameCanvas = document.getElementById('gameCanvas');
+        this.updateGameArea();
+
+        // 綁定事件
+        this.active = true;
+        this.boundAnimate = this.animate.bind(this);
+        window.addEventListener('resize', () => this.updateGameArea());
+
+        // 開始動畫
+        this.animate();
+    }
+
+    updateGameArea() {
+        this.gameArea = this.gameCanvas.getBoundingClientRect();
+    }
+
+    createSakura() {
+        if (!this.active) return;
+
+        const sakura = document.createElement('div');
+        sakura.style.cssText = `
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            will-change: transform;
+        `;
+        sakura.textContent = '🌸';
+
+        // 確保在遊戲區域外生成
+        let startX;
+        const padding = 50; // 與遊戲區域的安全距離
+        if (Math.random() < 0.5) {
+            startX = Math.random() * (this.gameArea.left - padding);
+        } else {
+            startX = this.gameArea.right + Math.random() * (window.innerWidth - this.gameArea.right - padding);
+        }
+
+        // 設置初始位置和樣式
+        sakura.style.left = `${startX}px`;
+        sakura.style.top = '-20px';
+        sakura.style.fontSize = `${Math.random() * 10 + 10}px`;
+
+        // 創建動畫
+        const animation = sakura.animate([
+            {
+                transform: 'translate(0, 0) rotate(0deg)',
+                opacity: 1
+            },
+            {
+                transform: `translate(${(Math.random() - 0.5) * 200}px, ${window.innerHeight + 20}px) rotate(360deg)`,
+                opacity: 0
+            }
+        ], {
+            duration: Math.random() * 3000 + 4000,
+            easing: 'linear'
+        });
+
+        // 動畫結束後清理
+        animation.onfinish = () => {
+            sakura.remove();
+        };
+
+        this.container.appendChild(sakura);
+    }
+
+    animate() {
+        if (this.active && Math.random() < 0.2) {
+            this.createSakura();
+        }
+        requestAnimationFrame(this.boundAnimate);
+    }
+
+    toggle() {
+        this.active = !this.active;
+        if (!this.active) {
+            // 清除所有櫻花
+            while (this.container.firstChild) {
+                this.container.removeChild(this.container.firstChild);
+            }
+        }
+    }
+}
+
+// 在 DOMContentLoaded 事件最後添加櫻花效果初始化
+document.addEventListener('DOMContentLoaded', () => {
+    // 確保在其他遊戲初始化之後執行
+    setTimeout(() => {
+        const sakuraEffect = new SakuraEffect();
+
+        // 添加控制按鈕到遊戲控制區
+        const controlsDiv = document.querySelector('.controls-content');
+        const toggleButton = document.createElement('div');
+        toggleButton.innerHTML = `
+            <label style="
+                display: block;
+                margin-top: 10px;
+                padding: 8px;
+                background: #ffd7eb;
+                border-radius: 5px;
+                text-align: center;
+                cursor: pointer;
+            ">
+                <input type="checkbox" checked style="margin-right: 5px;">
+                櫻吹雪效果
+            </label>
+        `;
+
+        // 綁定開關事件
+        const checkbox = toggleButton.querySelector('input');
+        checkbox.addEventListener('change', () => sakuraEffect.toggle());
+
+        // 添加到控制區
+        if (controlsDiv) {
+            controlsDiv.appendChild(toggleButton);
+        }
+    }, 100);
+});

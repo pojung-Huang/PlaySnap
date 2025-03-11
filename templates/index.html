@@ -66,7 +66,7 @@
         }
 
         .leaderboard {
-            width: 20vw;
+            width: 15vw;
             height: 90vh;
             background: white;
             padding: 1.5vh 1vw;
@@ -119,6 +119,8 @@
             width: calc(90vh * 4/3);
             background-color: #000;
             border: 2px solid #333;
+            position: relative;
+            z-index: 2;
         }
 
         .game-controls {
@@ -142,7 +144,7 @@
             top: 35%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 10;
+            z-index: 3;
         }
 
         .start-button {
@@ -233,7 +235,7 @@
         .sakura {
             position: fixed;
             pointer-events: none;
-            z-index: 100;
+            z-index: 1;
             animation: fall linear;
         }
 
@@ -247,15 +249,19 @@
                 opacity: 0;
             }
         }
+
+        .sakura-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 4;
+            background: rgba(255,255,255,0.8);
+            padding: 5px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <div style="position: fixed; top: 10px; left: 10px; z-index: 1000;">
-        <label style="background: rgba(255,255,255,0.8); padding: 5px; border-radius: 5px;">
-            <input type="checkbox" id="sakuraToggle" checked> 櫻吹雪
-        </label>
-    </div>
-    <div id="sakura-container" class="sakura-container"></div>
     <button class="title-button" oncontextmenu="return false">
         蛇麼玩意
     </button>
@@ -319,8 +325,17 @@
             this.animate = this.animate.bind(this);
             this.createSakura = this.createSakura.bind(this);
             
+            // 監聽視窗大小變化，更新遊戲區域位置
+            window.addEventListener('resize', () => {
+                this.gameArea = document.getElementById('gameCanvas').getBoundingClientRect();
+            });
+
             document.getElementById('sakuraToggle').addEventListener('change', (e) => {
                 this.active = e.target.checked;
+                if (!this.active) {
+                    // 清除所有現有的櫻花
+                    document.querySelectorAll('.sakura').forEach(el => el.remove());
+                }
             });
 
             this.animate();
@@ -334,7 +349,7 @@
             sakura.textContent = '🌸';
             sakura.style.fontSize = Math.random() * 10 + 10 + 'px';
 
-            // 避開遊戲區域
+            // 避開遊戲區域，確保櫻花只在兩側飄落
             let startX;
             if (Math.random() < 0.5) {
                 startX = Math.random() * (this.gameArea.left - 20);
@@ -355,6 +370,7 @@
 
             document.body.appendChild(sakura);
 
+            // 確保櫻花在動畫結束後被移除
             sakura.addEventListener('animationend', () => {
                 sakura.remove();
             });
@@ -368,8 +384,8 @@
         }
     }
 
-    // 在頁面加載完成後初始化櫻吹雪效果
-    document.addEventListener('DOMContentLoaded', () => {
+    // 確保在頁面完全加載後再初始化櫻花效果
+    window.addEventListener('load', () => {
         new SakuraEffect();
     });
     </script>
