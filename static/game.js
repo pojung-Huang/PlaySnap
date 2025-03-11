@@ -2,6 +2,8 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
 const startButton = document.querySelector('.start-button-container');
+const surrenderBtn = document.getElementById('surrenderBtn');
+const surrenderText = document.getElementById('surrenderText');
 
 // 設置畫布大小
 function resizeCanvas() {
@@ -20,6 +22,7 @@ window.addEventListener('resize', () => {
         snake.draw();
         food.draw();
     }
+    initButtonPosition();
 });
 
 const GRID_SIZE = Math.floor(canvas.height / 30); // 動態計算網格大小
@@ -39,6 +42,12 @@ let gameLoop = null;
 let score = 0;
 let currentPlayer = null;
 const defaultBackground = COLORS.BACKGROUND;
+let isRunning = false;
+let originalPosition = { x: 0, y: 0 };
+
+// 添加點擊計數器和計時器
+let clickCount = 0;
+let clickTimer = null;
 
 class Snake {
     constructor() {
@@ -257,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // 確保按鈕一開始是可見的
     startButton.style.display = 'block';
+    initButtonPosition();
 });
 
 // 在文件底部添加事件監聽
@@ -265,3 +275,131 @@ document.getElementById('bgUpload').addEventListener('change', function (e) {
         handleBackgroundImage(e.target.files[0]);
     }
 });
+
+// 計算逃跑方向
+function calculateEscapeDirection(mouseX, mouseY, button) {
+    // 使用視窗的可視區域
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const buttonRect = button.getBoundingClientRect();
+
+    // 計算右下四分之一區域
+    const quarterWidth = viewportWidth / 2;
+    const quarterHeight = viewportHeight / 2;
+
+    // 計算移動方向
+    const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+    const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+    const dx = buttonCenterX - mouseX;
+    const dy = buttonCenterY - mouseY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // 計算新位置，但限制在右下四分之一區域內
+    let newX = buttonRect.left + (dx / distance) * 300;
+    let newY = buttonRect.top + (dy / distance) * 300;
+
+    // 確保按鈕保持在範圍內
+    newX = Math.min(Math.max(newX, quarterWidth), viewportWidth - buttonRect.width);
+    newY = Math.min(Math.max(newY, quarterHeight), viewportHeight - buttonRect.height);
+
+    return {
+        x: newX - buttonRect.left,
+        y: newY - buttonRect.top
+    };
+}
+
+// 設置按鈕位置
+function setButtonPosition(button, x, y) {
+    button.style.transform = `translate(${x}px, ${y}px)`;
+}
+
+// 初始化按鈕位置
+function initButtonPosition() {
+    const container = surrenderBtn.parentElement;
+    originalPosition = {
+        x: 0,  // 保持在原位置
+        y: 0
+    };
+    setButtonPosition(surrenderBtn, originalPosition.x, originalPosition.y);
+}
+
+// 監聽滑鼠移動
+surrenderBtn.addEventListener('mouseover', function (e) {
+    if (!isRunning) {
+        isRunning = true;
+        const escape = calculateEscapeDirection(e.clientX, e.clientY, this);
+
+        setButtonPosition(this, escape.x, escape.y);
+        surrenderText.style.opacity = '1';
+
+        setTimeout(() => {
+            setButtonPosition(this, originalPosition.x, originalPosition.y);
+            surrenderText.style.opacity = '0';
+            isRunning = false;
+        }, 1000);
+    }
+});
+
+// 確保視窗大小改變時重新計算位置
+window.addEventListener('resize', () => {
+    setButtonPosition(surrenderBtn, originalPosition.x, originalPosition.y);
+});
+
+// 添加結束遊戲函數
+function endGame() {
+    if (gameLoop) {
+        clearInterval(gameLoop);
+
+        // 添加一些有趣的效果
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 清空畫布
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 顯示遊戲結束文字
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.8)';
+        ctx.font = '48px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('蛇麼事？', canvas.width / 2, canvas.height / 2);
+
+        // 顯示分數
+        ctx.font = '24px Arial';
+        ctx.fillText(`最終分數：${score}`, canvas.width / 2, canvas.height / 2 + 50);
+
+        // 重置遊戲狀態
+        snake = null;
+        food = null;
+        score = 0;
+        scoreElement.textContent = score;
+
+        // 顯示開始按鈕
+        startButton.style.display = 'block';
+    }
+}
+
+// 修改標題按鈕的點擊處理
+document.querySelector('.title-button').addEventListener('click', (e) => {
+    clickCount++;
+
+    // 清除之前的計時器
+    if (clickTimer) {
+        clearTimeout(clickTimer);
+    }
+
+    // 如果達到 5 次點擊
+    if (clickCount >= 10) {
+        endGame();
+        clickCount = 0; // 重置計數器
+        return;
+    }
+
+    // 設置新的計時器，1.5 秒後重置計數
+    clickTimer = setTimeout(() => {
+        clickCount = 0;
+    }, 1000);
+});
+
+// 移除原本的 onclick 事件
+document.querySelector('.title-button').removeAttribute('onclick');
