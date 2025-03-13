@@ -347,6 +347,7 @@ window.addEventListener('resize', () => {
 
 // 添加結束遊戲函數
 function endGame() {
+    submitScore(score);
     if (gameLoop) {
         clearInterval(gameLoop);
 
@@ -367,7 +368,6 @@ function endGame() {
         // 顯示分數
         ctx.font = '24px Arial';
         ctx.fillText(`最終分數：${score}`, canvas.width / 2, canvas.height / 2 + 50);
-        submitScore(score);
         // 重置遊戲狀態
         snake = null;
         food = null;
@@ -407,6 +407,7 @@ document.querySelector('.title-button').removeAttribute('onclick');
 // 修改櫻花效果的實現，確保與遊戲邏輯完全分離
 class SakuraEffect {
     constructor() {
+        this.active = false; // 預設關閉
         // 創建獨立的容器
         this.container = document.createElement('div');
         this.container.style.cssText = `
@@ -426,7 +427,6 @@ class SakuraEffect {
         this.updateGameArea();
 
         // 綁定事件
-        this.active = true;
         this.boundAnimate = this.animate.bind(this);
         window.addEventListener('resize', () => this.updateGameArea());
 
