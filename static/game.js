@@ -55,6 +55,14 @@ class Snake {
         this.direction = { x: 1, y: 0 };
         this.length = 1;
         this.isChangingDirection = false;
+        this.bodyColors = [
+            '#32CD32', // 亮綠色
+            '#2FBC2F',
+            '#2CAC2C',
+            '#299C29',
+            '#268C26',
+            '#237D23'  // 最深綠色
+        ];
     }
 
     update() {
@@ -79,9 +87,63 @@ class Snake {
     }
 
     draw() {
-        ctx.fillStyle = COLORS.SNAKE;
-        this.positions.forEach(pos => {
-            ctx.fillRect(pos.x * GRID_SIZE, pos.y * GRID_SIZE, GRID_SIZE - 1, GRID_SIZE - 1);
+        // 確保有正確的繪圖上下文
+        if (!ctx) return;
+
+        this.positions.forEach((pos, index) => {
+            const x = pos.x * GRID_SIZE;
+            const y = pos.y * GRID_SIZE;
+            const size = GRID_SIZE - 1;
+
+            if (index === 0) {
+                // 繪製蛇頭（深綠色）
+                ctx.fillStyle = '#006400';
+                ctx.fillRect(x, y, size, size);
+
+                // 添加紅色舌頭
+                ctx.fillStyle = '#FF0000';
+                if (this.direction.x === 1) { // 向右
+                    ctx.fillRect(x + size, y + size / 2 - 1, 8, 2);
+                    ctx.fillRect(x + size + 4, y + size / 2 - 2, 4, 1);
+                    ctx.fillRect(x + size + 4, y + size / 2 + 1, 4, 1);
+                } else if (this.direction.x === -1) { // 向左
+                    ctx.fillRect(x - 8, y + size / 2 - 1, 8, 2);
+                    ctx.fillRect(x - 8, y + size / 2 - 2, 4, 1);
+                    ctx.fillRect(x - 8, y + size / 2 + 1, 4, 1);
+                } else if (this.direction.y === -1) { // 向上
+                    ctx.fillRect(x + size / 2 - 1, y - 8, 2, 8);
+                    ctx.fillRect(x + size / 2 - 2, y - 8, 1, 4);
+                    ctx.fillRect(x + size / 2 + 1, y - 8, 1, 4);
+                } else { // 向下
+                    ctx.fillRect(x + size / 2 - 1, y + size, 2, 8);
+                    ctx.fillRect(x + size / 2 - 2, y + size + 4, 1, 4);
+                    ctx.fillRect(x + size / 2 + 1, y + size + 4, 1, 4);
+                }
+
+                // 添加眼睛
+                ctx.fillStyle = 'white';
+                let eyeX1, eyeY1, eyeX2, eyeY2;
+                if (this.direction.x === 1) {
+                    eyeX1 = x + size - 4; eyeY1 = y + 4;
+                    eyeX2 = x + size - 4; eyeY2 = y + size - 8;
+                } else if (this.direction.x === -1) {
+                    eyeX1 = x + 4; eyeY1 = y + 4;
+                    eyeX2 = x + 4; eyeY2 = y + size - 8;
+                } else if (this.direction.y === -1) {
+                    eyeX1 = x + 4; eyeY1 = y + 4;
+                    eyeX2 = x + size - 8; eyeY2 = y + 4;
+                } else {
+                    eyeX1 = x + 4; eyeY1 = y + size - 8;
+                    eyeX2 = x + size - 8; eyeY2 = y + size - 8;
+                }
+                ctx.fillRect(eyeX1, eyeY1, 4, 4);
+                ctx.fillRect(eyeX2, eyeY2, 4, 4);
+            } else {
+                // 繪製蛇身，顏色逐漸加深
+                const colorIndex = Math.min(index - 1, this.bodyColors.length - 1);
+                ctx.fillStyle = this.bodyColors[colorIndex];
+                ctx.fillRect(x, y, size, size);
+            }
         });
     }
 }
@@ -89,27 +151,111 @@ class Snake {
 class Food {
     constructor() {
         this.position = { x: 0, y: 0 };
+        // 設定一般水果
+        this.fruits = [
+            { emoji: '🍎', score: 10, threshold: 0 },
+            { emoji: '🍐', score: 15, threshold: 0 },
+            { emoji: '🍊', score: 20, threshold: 50 },
+            { emoji: '🍇', score: 25, threshold: 100 },
+            { emoji: '🍉', score: 30, threshold: 200 },
+            { emoji: '🍌', score: 35, threshold: 300 },
+            { emoji: '🍓', score: 40, threshold: 400 },
+            { emoji: '🍑', score: 50, threshold: 500 }
+        ];
+
+        // 設定特殊水果
+        this.specialFruits = [
+            {
+                emoji: '⚡', // 閃電：加速
+                score: 500,
+                threshold: 2000,
+                special: 'speed',
+                effect: () => {
+                    clearInterval(gameLoop);
+                    gameLoop = setInterval(update, 66); // 原本100ms改為66ms，約1.5倍速
+                    setTimeout(() => {
+                        clearInterval(gameLoop);
+                        gameLoop = setInterval(update, 100); // 10秒後恢復正常速度
+                    }, 10000);
+                }
+            },
+            {
+                emoji: '🌟', // 星星：加長
+                score: 200,
+                threshold: 1500,
+                special: 'grow',
+                effect: () => {
+                    snake.length += 5;
+                }
+            },
+            {
+                emoji: '✂️', // 剪刀：減半
+                score: 100,
+                threshold: 500,
+                special: 'shrink',
+                effect: () => {
+                    snake.length = Math.max(1, Math.floor(snake.length / 2));
+                    snake.positions = snake.positions.slice(0, snake.length);
+                }
+            }
+        ];
+
+        this.currentFruit = this.getRandomFruit();
         this.randomize();
+    }
+
+    getRandomFruit() {
+        // 合併可用的普通水果和特殊水果
+        const availableFruits = this.fruits.filter(fruit => score >= fruit.threshold);
+        const availableSpecial = this.specialFruits.filter(fruit => score >= fruit.threshold);
+
+        // 提高特殊水果的出現機率到 50%
+        if (availableSpecial.length > 0 && Math.random() < 0.5) {
+            // 從可用的特殊水果中隨機選擇一個
+            return availableSpecial[Math.floor(Math.random() * availableSpecial.length)];
+        }
+
+        // 普通水果的選擇邏輯保持不變
+        const weights = availableFruits.map(fruit => {
+            const scoreDiff = score - fruit.threshold;
+            return Math.max(1, 10 - Math.floor(scoreDiff / 50));
+        });
+
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let random = Math.random() * totalWeight;
+
+        for (let i = 0; i < availableFruits.length; i++) {
+            random -= weights[i];
+            if (random <= 0) {
+                return availableFruits[i];
+            }
+        }
+
+        return availableFruits[0];
     }
 
     randomize() {
         this.position.x = Math.floor(Math.random() * GRID_WIDTH);
         this.position.y = Math.floor(Math.random() * GRID_HEIGHT);
+        this.currentFruit = this.getRandomFruit();
     }
 
     draw() {
-        ctx.fillStyle = COLORS.FOOD;
-        ctx.fillRect(
-            this.position.x * GRID_SIZE,
-            this.position.y * GRID_SIZE,
-            GRID_SIZE - 1,
-            GRID_SIZE - 1
-        );
+        if (!ctx) return;
+
+        ctx.font = `${GRID_SIZE - 2}px Arial`;
+        const x = this.position.x * GRID_SIZE + GRID_SIZE / 2;
+        const y = this.position.y * GRID_SIZE + GRID_SIZE * 0.75;
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+        ctx.fillText(this.currentFruit.emoji, x, y);
     }
 }
 
 function startGame() {
-    // 隱藏開始按鈕
+    console.log('開始遊戲');
     startButton.style.display = 'none';
 
     if (gameLoop) {
@@ -121,6 +267,11 @@ function startGame() {
     score = 0;
     scoreElement.textContent = score;
 
+    console.log('初始化完成');
+    console.log('蛇的位置:', snake.positions);
+    console.log('食物位置:', food.position);
+
+    update(); // 立即執行一次更新
     gameLoop = setInterval(update, 100);
 }
 
@@ -214,8 +365,12 @@ function update() {
     // 4. 檢查食物碰撞
     const head = snake.positions[0];
     if (head.x === food.position.x && head.y === food.position.y) {
-        snake.length++;
-        score += 10;
+        // 如果是特殊水果，觸發特殊效果
+        if (food.currentFruit.special) {
+            food.currentFruit.effect();
+        }
+        snake.length++; // 一般成長效果
+        score += food.currentFruit.score;
         scoreElement.textContent = score;
         food.randomize();
     }
@@ -298,7 +453,7 @@ function calculateEscapeDirection(mouseX, mouseY, button) {
     let newX = buttonRect.left + (dx / distance) * 300;
     let newY = buttonRect.top + (dy / distance) * 300;
 
-    // 確保按鈕保持在範圍內
+    // 確保按鈕保持在範圍內 
     newX = Math.min(Math.max(newX, quarterWidth), viewportWidth - buttonRect.width);
     newY = Math.min(Math.max(newY, quarterHeight), viewportHeight - buttonRect.height);
 
@@ -401,8 +556,20 @@ document.querySelector('.title-button').addEventListener('click', (e) => {
     }, 1500);
 });
 
-// 移除原本的 onclick 事件
-document.querySelector('.title-button').removeAttribute('onclick');
+// 添加櫻花效果控制
+document.querySelector('.what-btn').addEventListener('click', () => {
+    if (window.sakuraEffect) {
+        window.sakuraEffect.toggle();
+    }
+});
+
+// 修改 SakuraEffect 類的初始化
+document.addEventListener('DOMContentLoaded', () => {
+    // 確保在其他遊戲初始化之後執行
+    setTimeout(() => {
+        window.sakuraEffect = new SakuraEffect();
+    }, 100);
+});
 
 // 修改櫻花效果的實現，確保與遊戲邏輯完全分離
 class SakuraEffect {
@@ -505,37 +672,36 @@ class SakuraEffect {
     }
 }
 
-// 在 DOMContentLoaded 事件最後添加櫻花效果初始化
-document.addEventListener('DOMContentLoaded', () => {
-    // 確保在其他遊戲初始化之後執行
-    setTimeout(() => {
-        const sakuraEffect = new SakuraEffect();
+// 全局點擊事件，讓設定視窗跟隨點擊位置
+document.addEventListener('click', function (event) {
+    // 如果點擊的不是設定視窗內的元素，且設定視窗已顯示
+    const settingsBox = document.getElementById('settingsBox');
+    if (!event.target.closest('#settingsBox') &&
+        settingsBox.style.top !== '-200px' &&
+        !event.target.closest('.settings-btn')) {
+        // 移動設定視窗到新位置
+        settingsBox.style.left = (event.clientX - 225) + "px";
+        settingsBox.style.top = (event.clientY + 20) + "px";
+    }
+});
 
-        // 添加控制按鈕到遊戲控制區
-        const controlsDiv = document.querySelector('.controls-content');
-        const toggleButton = document.createElement('div');
-        toggleButton.innerHTML = `
-            <label style="
-                display: block;
-                margin-top: 10px;
-                padding: 8px;
-                background: #ffd7eb;
-                border-radius: 5px;
-                text-align: center;
-                cursor: pointer;
-            ">
-                <input type="checkbox" checked style="margin-right: 5px;">
-                櫻吹雪效果
-            </label>
-        `;
+// 修改設定按鈕點擊事件
+document.querySelector('.settings-btn').addEventListener('click', function (event) {
+    const settingsBox = document.getElementById('settingsBox');
+    settingsBox.style.display = 'block';  // 顯示視窗
+    settingsBox.style.left = (event.clientX - 225) + "px";
+    settingsBox.style.top = (event.clientY + 20) + "px";
+    event.stopPropagation();
+});
 
-        // 綁定開關事件
-        const checkbox = toggleButton.querySelector('input');
-        checkbox.addEventListener('change', () => sakuraEffect.toggle());
+// 修改關閉按鈕點擊事件
+document.getElementById('boxclose').addEventListener('click', function (event) {
+    const settingsBox = document.getElementById('settingsBox');
+    settingsBox.style.display = 'none';  // 完全隱藏視窗
+    event.stopPropagation();
+});
 
-        // 添加到控制區
-        if (controlsDiv) {
-            controlsDiv.appendChild(toggleButton);
-        }
-    }, 100);
+// 防止點擊設定框內部時觸發移動
+document.getElementById('settingsBox').addEventListener('click', function (event) {
+    event.stopPropagation();
 });

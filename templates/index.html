@@ -23,18 +23,34 @@
             flex-direction: column;
         }
 
+        .title-container {
+            text-align: center;
+            padding: 1vh;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .title-left {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .title-button {
             text-align: center;
             color: #333;
             padding: 1vh;
-            flex-shrink: 0;
             font-size: 2em;
             font-weight: bold;
             background: none;
             border: none;
             cursor: pointer;
-            position: relative;
             transition: color 0.3s;
+            margin: 0;  /* 移除按鈕間距 */
         }
 
         .title-button:hover {
@@ -62,12 +78,13 @@
             align-items: center;
             gap: 2vw;
             padding: 0 2vw;
-            padding-bottom: 2vh; /* 底部間距 */
+            padding-bottom: 4vh; /* 增加底部間距 */
+            margin-bottom: 2vh; /* 添加額外的底部邊距 */
         }
 
         .leaderboard {
             width: 15vw;
-            height: 90vh;
+            height: 85vh; /* 對應調整排行榜高度 */
             background: white;
             padding: 1.5vh 1vw;
             border-radius: 10px;
@@ -104,28 +121,31 @@
         .game-section {
             display: flex;
             gap: 2vw;
-            height: 90vh;
+            height: 85vh; /* 稍微縮小高度 */
             align-items: center;
         }
 
         .canvas-container {
             position: relative;
-            height: 90vh;
-            width: calc(90vh * 4/3);
+            height: 85vh;
+            width: calc(85vh * 4/3);
+            border-radius: 15px; /* 添加容器圓角 */
+            overflow: hidden; /* 確保內容不會超出圓角範圍 */
         }
 
         #gameCanvas {
-            height: 90vh;
-            width: calc(90vh * 4/3);
+            height: 85vh;
+            width: calc(85vh * 4/3);
             background-color: #000;
             border: 2px solid #333;
             position: relative;
             z-index: 2;
+            border-radius: 15px; /* 添加畫布圓角 */
         }
 
         .game-controls {
             width: 15vw;
-            height: 90vh;
+            height: 85vh; /* 對應調整控制面板高度 */
             padding: 2vh 1vw;
             background: white;
             border-radius: 10px;
@@ -145,21 +165,45 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 3;
+            border-radius: 15px; /* 開始按鈕容器也添加圓角 */
         }
 
         .start-button {
             padding: 15px 30px;
             font-size: 24px;
-            background-color: #4CAF50;
+            background-color: rgba(76, 175, 80, 0.8); /* 改為半透明綠色 */
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(3px); /* 添加模糊效果 */
+        }
+
+        .snake-icon {
+            font-size: 32px; /* 蛇圖案大一點 */
+            line-height: 1;
+        }
+
+        .button-text {
+            margin-top: 2px; /* 微調文字位置 */
         }
 
         .start-button:hover {
-            background-color: #45a049;
+            background-color: rgba(69, 160, 73, 0.9); /* 懸停時稍微不透明 */
+            transform: scale(1.05);
+        }
+
+        .start-button:hover .snake-icon {
+            animation: wiggle 0.5s ease infinite; /* 添加搖擺動畫 */
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
         }
 
         .bg-upload {
@@ -259,12 +303,196 @@
             padding: 5px;
             border-radius: 5px;
         }
+
+        .settings-btn {
+            margin-right: 20px;
+        }
+
+        .settings-box {
+            position: fixed;
+            top: -200px;
+            left: 30%;
+            width: 450px;
+            background-color: #fff;
+            color: #7F7F7F;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            box-shadow: 0 1px 5px #333;
+            z-index: 999;
+            transition: all 0.3s ease-out;
+            display: none;  /* 初始狀態設為不顯示 */
+        }
+
+        .settings-box.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .settings-box h1 {
+            border-bottom: 1px dashed #7F7F7F;
+            margin: -20px -20px 0px -20px;
+            padding: 10px;
+            background-color: #FFEFEF;
+            color: #EF7777;
+            border-radius: 20px 20px 0px 0px;
+        }
+
+        .settings-content {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .boxclose {
+            float: right;
+            width: 26px;
+            height: 26px;
+            margin-top: -30px;
+            margin-right: -30px;
+            cursor: pointer;
+            color: #333;
+            font-size: 30px;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+            line-height: 26px;
+        }
+
+        .boxclose:hover {
+            color: #666;
+        }
+
+        .bg-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upload-label, .reset-btn, .surrender-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .upload-label {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .upload-label:hover {
+            background: #45a049;
+        }
+
+        .reset-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #da190b;
+        }
+
+        .surrender-btn {
+            background: #FFA500;
+            color: white;
+            position: relative;
+        }
+
+        .surrender-btn:hover {
+            background: #FF8C00;
+        }
+
+        .surrender-text {
+            position: absolute;
+            background: #FEFEFE;
+            padding: 5px 15px;
+            border-radius: 999px;
+            border: 1px dashed #777;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 5px;
+        }
+
+        .surrender-btn:hover + .surrender-text {
+            opacity: 1;
+        }
+
+        .game-rules {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .game-rules h3 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        .game-rules p {
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+
+        .game-rules ul {
+            margin: 0;
+            padding-left: 20px;
+            list-style-type: none;
+        }
+
+        .game-rules li {
+            margin: 5px 0;
+            font-size: 0.85em;
+        }
+
+        .controls-content {
+            height: 100%;
+            overflow-y: auto;  /* 添加滾動條 */
+            padding-right: 10px;
+        }
     </style>
 </head>
 <body>
-    <button class="title-button" oncontextmenu="return false">
-        蛇麼玩意
-    </button>
+    <div class="title-container">
+        <div class="title-left">
+            <button class="title-button snake-btn">蛇</button><button class="title-button what-btn" style="margin-left: -10px;">麼玩意</button>
+        </div>
+        <button class="title-button settings-btn">⚙️</button>
+    </div>
+
+    <!-- 添加設定彈出視窗 - 放在 container 之前 -->
+    <div class="settings-box" id="settingsBox">
+        <a class="boxclose" id="boxclose">×</a>
+        <h1>遊戲設定</h1>
+        <div class="settings-content">
+            <div class="bg-upload">
+                <label for="bgUpload" class="upload-label">
+                    更換背景圖片
+                    <input 
+                        type="file" 
+                        id="bgUpload" 
+                        accept="image/*"
+                        style="display: none;"
+                    >
+                </label>
+                <button onclick="resetBackground()" class="reset-btn">
+                    重設背景
+                </button>
+                <button class="surrender-btn" id="surrenderBtn">投降</button>
+                <div class="surrender-text" id="surrenderText">唉呦我去，菜就多練</div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="leaderboard">
             <h2>排行榜</h2>
@@ -282,34 +510,45 @@
             <div class="canvas-container">
                 <canvas id="gameCanvas"></canvas>
                 <div class="start-button-container">
-                    <button onclick="startGame()" class="start-button">開始遊戲</button>
+                    <button onclick="startGame()" class="start-button">
+                        <span class="snake-icon">🐍</span>
+                        <span class="button-text">開始遊戲</span>
+                    </button>
                 </div>
             </div>
             <div class="game-controls">
                 <div class="controls-content">
                     <div>
                         <div id="score">分數：<span id="scoreValue">0</span></div>
-                        <p>使用方向鍵控制蛇的移動</p>
-                        
-                        <div class="bg-upload">
-                            <label for="bgUpload" class="upload-label">
-                                更換背景圖片
-                                <input 
-                                    type="file" 
-                                    id="bgUpload" 
-                                    accept="image/*"
-                                    style="display: none;"
-                                >
-                            </label>
-                            <button onclick="resetBackground()" class="reset-btn">
-                                重設背景
-                            </button>
+                        <div class="game-rules">
+                            <h3>遊戲規則：</h3>
+                            <p>基本規則：</p>
+                            <ul>
+                                <li>1.使用方向鍵控制蛇的移動方向</li>
+                                <li>2.撞到自己身體遊戲結束</li>
+                                <li>3.穿牆不會死亡</li>
+                            </ul>
+                            <p>🍎 基礎水果（初始解鎖）</p>
+                            <ul>
+                                <li>🍎 蘋果：10分</li>
+                                <li>🍐 梨子：15分</li>
+                            </ul>
+                            <p>🎯 進階水果（需解鎖）</p>
+                            <ul>
+                                <li>🍊 橘子：20分（50分解鎖）</li>
+                                <li>🍇 葡萄：25分（100分解鎖）</li>
+                                <li>🍉 西瓜：30分（200分解鎖）</li>
+                                <li>🍌 香蕉：35分（300分解鎖）</li>
+                                <li>🍓 草莓：40分（400分解鎖）</li>
+                                <li>🍑 桃子：50分（500分解鎖）</li>
+                            </ul>
+                            <p>✨ 特殊水果（需解鎖）</p>
+                            <ul>
+                                <li>🌟 星星：長度+5（1500分解鎖）</li>
+                                <li>⚡ 閃電：加速10秒（2000分解鎖）</li>
+                                <li>✂️ 剪刀：長度減半（2000分解鎖）</li>
+                            </ul>
                         </div>
-                    </div>
-
-                    <div class="surrender-container">
-                        <button class="surrender-btn" id="surrenderBtn">投降</button>
-                        <div class="surrender-text" id="surrenderText">唉呦我去，菜就多練</div>
                     </div>
                 </div>
             </div>
