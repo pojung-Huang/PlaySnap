@@ -148,6 +148,85 @@ class Snake {
     }
 }
 
+class SpecialEffect {
+    constructor(emoji) {
+        this.active = true;
+        this.emoji = emoji;
+        this.container = document.createElement('div');
+        this.container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        `;
+        document.body.appendChild(this.container);
+
+        this.animate = this.animate.bind(this);
+        this.createParticle = this.createParticle.bind(this);
+
+        // 開始動畫
+        this.animate();
+
+        // 5秒後自動停止
+        setTimeout(() => {
+            this.active = false;
+            setTimeout(() => {
+                this.container.remove();
+            }, 3000); // 給最後的粒子時間落下
+        }, 5000);
+    }
+
+    createParticle() {
+        if (!this.active) return;
+
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+            position: absolute;
+            user-select: none;
+            will-change: transform;
+            z-index: 1;
+            font-size: ${Math.random() * 20 + 10}px;
+        `;
+        particle.textContent = this.emoji;
+
+        // 隨機起始位置（從頂部開始）
+        const startX = Math.random() * window.innerWidth;
+        particle.style.left = `${startX}px`;
+        particle.style.top = '-20px';
+
+        // 創建動畫
+        const animation = particle.animate([
+            {
+                transform: 'translate(0, 0) rotate(0deg)',
+                opacity: 1
+            },
+            {
+                transform: `translate(${(Math.random() - 0.5) * 200}px, ${window.innerHeight + 20}px) rotate(${Math.random() * 360}deg)`,
+                opacity: 0
+            }
+        ], {
+            duration: Math.random() * 3000 + 2000,
+            easing: 'linear'
+        });
+
+        // 動畫結束後移除粒子
+        animation.onfinish = () => particle.remove();
+
+        this.container.appendChild(particle);
+    }
+
+    animate() {
+        if (this.active && Math.random() < 0.3) {
+            this.createParticle();
+        }
+        requestAnimationFrame(this.animate);
+    }
+}
+
 class Food {
     constructor() {
         this.position = { x: 0, y: 0 };
@@ -166,34 +245,37 @@ class Food {
         // 設定特殊水果
         this.specialFruits = [
             {
-                emoji: '⚡', // 閃電：加速
+                emoji: '⚡',
                 score: 500,
-                threshold: 2000,
+                threshold: 20,
                 special: 'speed',
                 effect: () => {
+                    new SpecialEffect('⚡'); // 添加特效
                     clearInterval(gameLoop);
-                    gameLoop = setInterval(update, 66); // 原本100ms改為66ms，約1.5倍速
+                    gameLoop = setInterval(update, 66);
                     setTimeout(() => {
                         clearInterval(gameLoop);
-                        gameLoop = setInterval(update, 100); // 10秒後恢復正常速度
+                        gameLoop = setInterval(update, 100);
                     }, 10000);
                 }
             },
             {
-                emoji: '🌟', // 星星：加長
+                emoji: '🌟',
                 score: 200,
-                threshold: 1500,
+                threshold: 15,
                 special: 'grow',
                 effect: () => {
+                    new SpecialEffect('🌟'); // 添加特效
                     snake.length += 5;
                 }
             },
             {
-                emoji: '✂️', // 剪刀：減半
+                emoji: '✂️',
                 score: 100,
-                threshold: 500,
+                threshold: 20,
                 special: 'shrink',
                 effect: () => {
+                    new SpecialEffect('✂️'); // 添加特效
                     snake.length = Math.max(1, Math.floor(snake.length / 2));
                     snake.positions = snake.positions.slice(0, snake.length);
                 }
