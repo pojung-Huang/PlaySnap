@@ -1,7 +1,12 @@
 API 文件說明
 ===========
 
-【排行榜 API】
+【基本配置】
+- Python 3.x
+- Flask
+- SQLite 資料庫
+
+【API 端點】
 
 1. 獲取排行榜
    GET /api/leaderboard
@@ -11,7 +16,7 @@ API 文件說明
      {
        "name": "玩家名稱",
        "score": 分數,
-       "date": "2024-03-xx"
+       "date": "YYYY-MM-DD HH:MM"
      }
    ]
 
@@ -30,7 +35,6 @@ API 文件說明
    }
 
 【資料庫結構】
-
 表名：Score
 欄位：
 - id: INTEGER PRIMARY KEY
