@@ -433,31 +433,66 @@
             color: #333;
         }
 
-        .game-rules h3 {
+        .rules-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .rules-header h3 {
+            margin: 0;
             color: #4CAF50;
         }
 
-        .game-rules p {
+        .rules-toggle {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .rules-toggle.expanded {
+            transform: rotate(180deg);
+        }
+
+        .rules-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease;
+        }
+
+        .rules-content.expanded {
+            grid-template-rows: 1fr;
+        }
+
+        .rules-inner {
+            overflow: hidden;
+        }
+
+        .rules-inner p {
             margin: 10px 0 5px 0;
             font-weight: bold;
         }
 
-        .game-rules ul {
+        .rules-inner ul {
             margin: 0;
             padding-left: 20px;
             list-style-type: none;
         }
 
-        .game-rules li {
+        .rules-inner li {
             margin: 5px 0;
             font-size: 0.85em;
         }
 
-        .controls-content {
-            height: 100%;
-            overflow-y: auto;  /* 添加滾動條 */
-            padding-right: 10px;
+        .theme-selector,
+        .theme-grid,
+        .theme-btn {
+            display: none;
         }
     </style>
 </head>
@@ -521,33 +556,40 @@
                     <div>
                         <div id="score">分數：<span id="scoreValue">0</span></div>
                         <div class="game-rules">
-                            <h3>遊戲規則：</h3>
-                            <p>基本規則：</p>
-                            <ul>
-                                <li>1.使用方向鍵控制蛇的移動方向</li>
-                                <li>2.撞到自己身體遊戲結束</li>
-                                <li>3.穿牆不會死亡</li>
-                            </ul>
-                            <p>🍎 基礎水果（初始解鎖）</p>
-                            <ul>
-                                <li>🍎 蘋果：10分</li>
-                                <li>🍐 梨子：15分</li>
-                            </ul>
-                            <p>🎯 進階水果（需解鎖）</p>
-                            <ul>
-                                <li>🍊 橘子：20分（50分解鎖）</li>
-                                <li>🍇 葡萄：25分（100分解鎖）</li>
-                                <li>🍉 西瓜：30分（200分解鎖）</li>
-                                <li>🍌 香蕉：35分（300分解鎖）</li>
-                                <li>🍓 草莓：40分（400分解鎖）</li>
-                                <li>🍑 桃子：50分（500分解鎖）</li>
-                            </ul>
-                            <p>✨ 特殊水果（需解鎖）</p>
-                            <ul>
-                                <li>🌟 星星：長度+5（1500分解鎖）</li>
-                                <li>⚡ 閃電：加速10秒（2000分解鎖）</li>
-                                <li>✂️ 剪刀：長度減半（2000分解鎖）</li>
-                            </ul>
+                            <div class="rules-header">
+                                <h3>遊戲規則</h3>
+                                <button class="rules-toggle">▼</button>
+                            </div>
+                            <div class="rules-content">
+                                <div class="rules-inner">
+                                    <p>基本規則：</p>
+                                    <ul>
+                                        <li>1.使用方向鍵控制蛇的移動方向</li>
+                                        <li>2.撞到自己身體遊戲結束</li>
+                                        <li>3.穿牆不會死亡</li>
+                                    </ul>
+                                    <p>🍎 基礎水果（初始解鎖）</p>
+                                    <ul>
+                                        <li>🍎 蘋果：10分</li>
+                                        <li>🍐 梨子：15分</li>
+                                    </ul>
+                                    <p>🎯 進階水果（需解鎖）</p>
+                                    <ul>
+                                        <li>🍊 橘子：20分（50分解鎖）</li>
+                                        <li>🍇 葡萄：25分（100分解鎖）</li>
+                                        <li>�� 西瓜：30分（200分解鎖）</li>
+                                        <li>🍌 香蕉：35分（300分解鎖）</li>
+                                        <li>🍓 草莓：40分（400分解鎖）</li>
+                                        <li>🍑 桃子：50分（500分解鎖）</li>
+                                    </ul>
+                                    <p>✨ 特殊水果（需解鎖）</p>
+                                    <ul>
+                                        <li>🌟 星星：長度+5（1500分解鎖）</li>
+                                        <li>⚡ 閃電：加速10秒（2000分解鎖）</li>
+                                        <li>✂️ 剪刀：長度減半（2000分解鎖）</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

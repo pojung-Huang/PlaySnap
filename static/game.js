@@ -247,7 +247,7 @@ class Food {
             {
                 emoji: '⚡',
                 score: 500,
-                threshold: 20,
+                threshold: 2000,
                 special: 'speed',
                 effect: () => {
                     new SpecialEffect('⚡'); // 添加特效
@@ -262,7 +262,7 @@ class Food {
             {
                 emoji: '🌟',
                 score: 200,
-                threshold: 15,
+                threshold: 1000,
                 special: 'grow',
                 effect: () => {
                     new SpecialEffect('🌟'); // 添加特效
@@ -272,11 +272,11 @@ class Food {
             {
                 emoji: '✂️',
                 score: 100,
-                threshold: 20,
+                threshold: 2000,
                 special: 'shrink',
                 effect: () => {
                     new SpecialEffect('✂️'); // 添加特效
-                    snake.length = Math.max(1, Math.floor(snake.length / 2));
+                    snake.length = Math.max(1, Math.floor(snake.length / 10));
                     snake.positions = snake.positions.slice(0, snake.length);
                 }
             }
@@ -535,7 +535,7 @@ function calculateEscapeDirection(mouseX, mouseY, button) {
     let newX = buttonRect.left + (dx / distance) * 300;
     let newY = buttonRect.top + (dy / distance) * 300;
 
-    // 確保按鈕保持在範圍內 
+    // 確保按鈕保持在範圍內
     newX = Math.min(Math.max(newX, quarterWidth), viewportWidth - buttonRect.width);
     newY = Math.min(Math.max(newY, quarterHeight), viewportHeight - buttonRect.height);
 
@@ -786,4 +786,156 @@ document.getElementById('boxclose').addEventListener('click', function (event) {
 // 防止點擊設定框內部時觸發移動
 document.getElementById('settingsBox').addEventListener('click', function (event) {
     event.stopPropagation();
+});
+
+// 保持原有的遊戲代碼不變
+class Game {
+    // ... 原有的遊戲代碼 ...
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+    const game = new Game();
+});
+
+// 添加蛇按鈕特效類
+class SnakeEffect {
+    constructor() {
+        this.container = document.createElement('div');
+        this.container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        `;
+        document.body.appendChild(this.container);
+
+        setTimeout(() => {
+            this.container.remove();
+        }, 8000);
+    }
+
+    createSnake(x, y) {
+        const snake = document.createElement('div');
+        snake.textContent = '🐍';
+        snake.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            font-size: ${Math.random() * 20 + 20}px;
+            transform-origin: center;
+            user-select: none;
+            z-index: 1000;
+        `;
+
+        // 均勻分布的角度
+        const angleStep = (Math.PI * 2) / 30; // 將360度平均分成30份
+        const angleOffset = Math.random() * angleStep; // 添加隨機偏移
+        const angle = (this.snakeCount * angleStep) + angleOffset;
+
+        // 隨機化初始速度，但保持最小速度
+        const minSpeed = 15;
+        const maxSpeed = 25;
+        const speed = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+
+        let vx = Math.cos(angle) * speed;
+        let vy = Math.sin(angle) * speed;
+        let posX = 0;
+        let posY = 0;
+        let rotation = 0;
+        let bounceCount = 0; // 記錄反彈次數
+
+        const maxX = window.innerWidth - snake.offsetWidth;
+        const maxY = window.innerHeight - snake.offsetHeight;
+
+        const animate = () => {
+            posX += vx;
+            posY += vy;
+
+            // 減小重力效果
+            vy += 0.2;
+
+            // 改進的邊界碰撞處理
+            if (posX < 0) {
+                posX = 0;
+                vx = Math.abs(vx) * 0.85;
+                rotation += Math.random() * 360; // 隨機旋轉
+                bounceCount++;
+            }
+            if (posX > maxX) {
+                posX = maxX;
+                vx = -Math.abs(vx) * 0.85;
+                rotation += Math.random() * 360;
+                bounceCount++;
+            }
+            if (posY < 0) {
+                posY = 0;
+                vy = Math.abs(vy) * 0.85;
+                rotation += Math.random() * 360;
+                bounceCount++;
+            }
+            if (posY > maxY) {
+                posY = maxY;
+                vy = -Math.abs(vy) * 0.85;
+                rotation += Math.random() * 360;
+                bounceCount++;
+            }
+
+            // 更新位置和旋轉
+            snake.style.transform = `translate(${posX}px, ${posY}px) rotate(${rotation}deg)`;
+
+            // 計算當前速度
+            const currentSpeed = Math.sqrt(vx * vx + vy * vy);
+
+            // 根據反彈次數和速度決定是否繼續動畫
+            if (currentSpeed > 0.5 && bounceCount < 5) {
+                requestAnimationFrame(animate);
+            } else {
+                // 淡出效果
+                snake.style.transition = 'opacity 0.8s';
+                snake.style.opacity = '0';
+                setTimeout(() => snake.remove(), 800);
+            }
+        };
+
+        this.container.appendChild(snake);
+        requestAnimationFrame(animate);
+    }
+}
+
+// 修改蛇按鈕的點擊事件
+document.querySelector('.snake-btn').addEventListener('click', (e) => {
+    const effect = new SnakeEffect();
+    effect.snakeCount = 0; // 初始化計數器
+
+    // 使用 requestAnimationFrame 來創建蛇，使動畫更流暢
+    const createSnakes = () => {
+        if (effect.snakeCount < 30) {
+            effect.createSnake(e.clientX, e.clientY);
+            effect.snakeCount++;
+            requestAnimationFrame(createSnakes);
+        }
+    };
+    createSnakes();
+});
+
+// 添加遊戲規則展開收合功能
+document.addEventListener('DOMContentLoaded', () => {
+    const rulesHeader = document.querySelector('.rules-header');
+    const rulesContent = document.querySelector('.rules-content');
+    const rulesToggle = document.querySelector('.rules-toggle');
+    let isExpanded = false;
+
+    rulesHeader.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+        rulesContent.classList.toggle('expanded', isExpanded);
+        rulesToggle.classList.toggle('expanded', isExpanded);
+    });
+
+    // 預設只顯示基本規則
+    rulesContent.classList.remove('expanded');
 });
