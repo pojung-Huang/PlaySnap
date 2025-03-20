@@ -533,6 +533,19 @@
                         重設影片背景
                     </button>
                 </div>
+                
+                <!-- 新增影片控制按鈕 -->
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="playVideo()" class="upload-label" style="flex: 1;">
+                        播放
+                    </button>
+                    <button onclick="pauseVideo()" class="upload-label" style="flex: 1;">
+                        暫停
+                    </button>
+                    <button onclick="toggleMute()" class="upload-label" style="flex: 1;">
+                        靜音
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -685,8 +698,42 @@
         new SakuraEffect();
     });
 
+    let videoId = null;
+    let isMuted = true;
+
+    function playVideo() {
+        const iframe = document.querySelector('.canvas-container iframe');
+        if (iframe) {
+            iframe.src = iframe.src.replace('autoplay=0', 'autoplay=1');
+        }
+    }
+
+    function pauseVideo() {
+        const iframe = document.querySelector('.canvas-container iframe');
+        if (iframe) {
+            iframe.src = iframe.src.replace('autoplay=1', 'autoplay=0');
+        }
+    }
+
+    function toggleMute() {
+        const iframe = document.querySelector('.canvas-container iframe');
+        const muteBtn = document.querySelector('button[onclick="toggleMute()"]');
+        
+        if (iframe) {
+            if (isMuted) {
+                // 取消靜音
+                iframe.src = iframe.src.replace('mute=1', 'mute=0');
+                muteBtn.textContent = '靜音';
+            } else {
+                // 靜音
+                iframe.src = iframe.src.replace('mute=0', 'mute=1');
+                muteBtn.textContent = '取消靜音';
+            }
+            isMuted = !isMuted;
+        }
+    }
+
     function getYoutubeVideoId(url) {
-        // 處理不同格式的 YouTube URL
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
@@ -694,17 +741,24 @@
 
     function setYoutubeBackground() {
         const url = document.getElementById('youtubeUrl').value;
-        const videoId = getYoutubeVideoId(url);
+        const newVideoId = getYoutubeVideoId(url);
         
-        if (!videoId) {
+        if (!newVideoId) {
             alert('請輸入有效的 YouTube 網址');
             return;
         }
 
-        // 創建 iframe
+        videoId = newVideoId;
+        
+        // 移除舊的 iframe
+        const oldIframe = document.querySelector('.canvas-container iframe');
+        if (oldIframe) {
+            oldIframe.remove();
+        }
+
+        // 創建新的 iframe
         const iframe = document.createElement('iframe');
         iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&loop=1&playlist=${videoId}&mute=1`;
-        iframe.allow = "autoplay";
         iframe.style.cssText = `
             position: absolute;
             top: 0;
@@ -713,16 +767,14 @@
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            border: none;
         `;
-
-        // 移除舊的背景
-        const oldIframe = document.querySelector('.canvas-container iframe');
-        if (oldIframe) {
-            oldIframe.remove();
-        }
-
-        // 添加新的背景
+        
         document.querySelector('.canvas-container').insertBefore(iframe, canvas);
+        
+        // 重置靜音狀態
+        isMuted = true;
+        document.querySelector('button[onclick="toggleMute()"]').textContent = '取消靜音';
     }
 
     function resetYoutubeBackground() {
@@ -731,12 +783,13 @@
             iframe.remove();
         }
         document.getElementById('youtubeUrl').value = '';
+        videoId = null;
     }
 
-function toggleRules() {
-    const content = document.getElementById('rulesContent');
-    content.classList.toggle('show');
-}
+    function toggleRules() {
+        const content = document.getElementById('rulesContent');
+        content.classList.toggle('show');
+    }
 
     // 點擊視窗外關閉規則
     window.onclick = function(event) {
