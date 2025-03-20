@@ -381,17 +381,6 @@
             transition: transform 0.3s;
         }
 
-        .rules-content {
-            display: none;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-top: 10px;
-            padding: 15px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
         .rules-inner {
             font-size: 14px;
         }
@@ -522,23 +511,7 @@
         <h1>其他設定</h1>
         <div class="settings-content">
             <div class="bg-upload">
-                <!-- 背景圖片設定 - 並排 -->
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <button class="upload-label" style="flex: 1;">
-                        更換背景圖片
-                        <input 
-                            type="file" 
-                            id="bgUpload" 
-                            accept="image/*"
-                            style="display: none;"
-                        >
-                    </button>
-                    <button onclick="resetBackground()" class="reset-btn" style="flex: 1;">
-                        重設背景圖片
-                    </button>
-                </div>
-                <hr>
-
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;"></div>                
                 <!-- YouTube 影片設定 -->
                 <input 
                     type="text" 
@@ -573,26 +546,6 @@
                         <span class="snake-icon">🐍</span>
                         <span class="button-text">開始遊戲</span>
                     </button>
-                </div>
-                <!-- 在 canvas-container 下方添加輪播 -->
-                <div class="game-slideshow">
-                    <div class="slide fade">
-                        <img src="{{ url_for('static', filename='image/富士山01.jpg') }}" alt="富士山1">
-                    </div>
-                    <div class="slide fade">
-                        <img src="{{ url_for('static', filename='image/富士山02.jpg') }}" alt="富士山2">
-                    </div>
-                    <div class="slide fade">
-                        <img src="{{ url_for('static', filename='image/富士山03.jpg') }}" alt="富士山3">
-                    </div>
-                    <div class="slide fade">
-                        <img src="{{ url_for('static', filename='image/富士山04.jpg') }}" alt="富士山4">
-                    </div>
-                    <div class="slide fade">
-                        <img src="{{ url_for('static', filename='image/富士山05.jpg') }}" alt="富士山5">
-                    </div>
-                    <button class="slide-btn prev" onclick="changeSlide(-1)">❮</button>
-                    <button class="slide-btn next" onclick="changeSlide(1)">❯</button>
                 </div>
             </div>
             <div class="game-controls">
@@ -780,18 +733,10 @@
         document.getElementById('youtubeUrl').value = '';
     }
 
-    function toggleRules() {
-        const content = document.getElementById('rulesContent');
-        const toggle = document.querySelector('.rules-toggle');
-        
-        if (content.style.display === 'block') {
-            content.style.display = 'none';
-            toggle.classList.remove('expanded');
-        } else {
-            content.style.display = 'block';
-            toggle.classList.add('expanded');
-        }
-    }
+function toggleRules() {
+    const content = document.getElementById('rulesContent');
+    content.classList.toggle('show');
+}
 
     // 點擊視窗外關閉規則
     window.onclick = function(event) {
@@ -800,28 +745,6 @@
             modal.style.display = 'none';
         }
     }
-
-    // 添加背景輪替功能
-    const backgrounds = [
-        "{{ url_for('static', filename='image/富士山01.jpg') }}",
-        "{{ url_for('static', filename='image/富士山02.jpg') }}",
-        "{{ url_for('static', filename='image/富士山03.jpg') }}",
-        "{{ url_for('static', filename='image/富士山04.jpg') }}",
-        "{{ url_for('static', filename='image/富士山05.jpg') }}"
-    ];
-
-    let currentBgIndex = 0;
-
-    function changeBackground() {
-        currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
-        document.body.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
-    }
-
-    // 初始化背景
-    document.body.style.backgroundImage = `url('${backgrounds[0]}')`;
-
-    // 每10秒切換一次背景
-    setInterval(changeBackground, 10000);
     </script>
 </body>
 </html> 

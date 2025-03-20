@@ -550,13 +550,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 在文件底部添加事件監聽
-document.getElementById('bgUpload').addEventListener('change', function (e) {
-    if (e.target.files && e.target.files[0]) {
-        handleBackgroundImage(e.target.files[0]);
-    }
-});
-
 // 添加結束遊戲函數
 function endGame() {
     submitScore(score);
