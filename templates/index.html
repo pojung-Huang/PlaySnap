@@ -522,55 +522,43 @@
         <h1>遊戲設定</h1>
         <div class="settings-content">
             <div class="bg-upload">
-                <label for="bgUpload" class="upload-label">
-                    更換背景圖片
-                    <input 
-                        type="file" 
-                        id="bgUpload" 
-                        accept="image/*"
-                        style="display: none;"
-                    >
-                </label>
-                <button onclick="resetBackground()" class="reset-btn">
-                    重設背景
-                </button>
-                <button class="surrender-btn" id="surrenderBtn">投降</button>
-                <div class="surrender-text" id="surrenderText">唉呦我去，菜就多練</div>
-                
-                <!-- 添加輔助線開關 -->
-                <label class="upload-label" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <input type="checkbox" id="toggleGuidelines" checked>
-                    顯示輔助線
-                </label>
+                <!-- 背景圖片設定 - 並排 -->
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button class="upload-label" style="flex: 1;">
+                        更換背景圖片
+                        <input 
+                            type="file" 
+                            id="bgUpload" 
+                            accept="image/*"
+                            style="display: none;"
+                        >
+                    </button>
+                    <button onclick="resetBackground()" class="reset-btn" style="flex: 1;">
+                        重設背景圖片
+                    </button>
+                </div>
 
-                <!-- YouTube 背景設定 -->
+                <!-- YouTube 影片設定 -->
                 <input 
                     type="text" 
                     id="youtubeUrl" 
                     placeholder="輸入 YouTube 網址或嵌入代碼"
-                    class="upload-label"
-                    style="width: 100%; padding: 5px; margin-top: 5px;"
+                    style="width: 100%; 
+                           padding: 10px; 
+                           margin-bottom: 10px;
+                           border: 1px solid #ccc;
+                           border-radius: 5px;
+                           box-sizing: border-box;"
                 >
-                <button onclick="setYoutubeBackground()" class="upload-label">
-                    設定影片背景
-                </button>
-                
-                <!-- 添加影片控制按鈕 -->
-                <div class="video-controls" style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button onclick="playVideo()" class="upload-label">
-                        播放 ▶
+                <!-- YouTube 按鈕 - 並排 -->
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="setYoutubeBackground()" class="upload-label" style="flex: 1;">
+                        設定影片背景
                     </button>
-                    <button onclick="pauseVideo()" class="upload-label">
-                        暫停 ⏸
-                    </button>
-                    <button onclick="toggleMute()" class="upload-label" id="muteButton">
-                        靜音 🔇
+                    <button onclick="resetYoutubeBackground()" class="reset-btn" style="flex: 1;">
+                        重設影片背景
                     </button>
                 </div>
-                
-                <button onclick="resetYoutubeBackground()" class="reset-btn">
-                    重設影片背景
-                </button>
             </div>
         </div>
     </div>
