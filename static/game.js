@@ -4,6 +4,7 @@ const scoreElement = document.getElementById('scoreValue');
 const startButton = document.querySelector('.start-button-container');
 const surrenderBtn = document.getElementById('surrenderBtn');
 const surrenderText = document.getElementById('surrenderText');
+let showGuidelines = true; // 新增輔助線控制變數
 
 // 設置畫布大小
 function resizeCanvas() {
@@ -419,6 +420,32 @@ function resetBackground() {
     update();
 }
 
+function drawGuidelines() {
+    if (!showGuidelines) return;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
+    ctx.lineWidth = 1;
+
+    // 繪製水平輔助線
+    for (let i = 0; i < GRID_HEIGHT; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * GRID_SIZE);
+        ctx.lineTo(canvas.width, i * GRID_SIZE);
+        ctx.stroke();
+    }
+
+    // 繪製垂直輔助線
+    for (let i = 0; i < GRID_WIDTH; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * GRID_SIZE, 0);
+        ctx.lineTo(i * GRID_SIZE, canvas.height);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
+
 // 修改 update 函數
 function update() {
     // 1. 先清空畫布
@@ -433,6 +460,8 @@ function update() {
         ctx.fillStyle = defaultBackground;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+
+    drawGuidelines(); // 添加輔助線繪製
 
     // 3. 檢查遊戲狀態
     if (!snake.update()) {
@@ -504,6 +533,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 確保按鈕一開始是可見的
     startButton.style.display = 'block';
     initButtonPosition();
+
+    const toggleGuidelines = document.getElementById('toggleGuidelines');
+    if (toggleGuidelines) {
+        toggleGuidelines.addEventListener('change', function () {
+            showGuidelines = this.checked;
+        });
+    }
 });
 
 // 在文件底部添加事件監聽
