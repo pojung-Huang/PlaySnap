@@ -129,18 +129,14 @@
             position: relative;
             height: 85vh;
             width: calc(85vh * 4/3);
-            border-radius: 15px; /* 添加容器圓角 */
-            overflow: hidden; /* 確保內容不會超出圓角範圍 */
+            border-radius: 15px;
+            overflow: hidden;
         }
 
         #gameCanvas {
-            height: 85vh;
-            width: calc(85vh * 4/3);
-            background-color: #000;
-            border: 2px solid #333;
             position: relative;
             z-index: 2;
-            border-radius: 15px; /* 添加畫布圓角 */
+            background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
         }
 
         .game-controls {
@@ -494,7 +490,23 @@
         .theme-btn {
             display: none;
         }
+
+        .video-controls button {
+            flex: 1;
+            min-width: 60px;
+            padding: 5px;
+        }
+
+        #youtubePlayer {
+            pointer-events: none;
+        }
+
+        .canvas-container {
+            position: relative;
+            overflow: hidden;
+        }
     </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
     <div class="title-container">
@@ -530,6 +542,35 @@
                     <input type="checkbox" id="toggleGuidelines" checked>
                     顯示輔助線
                 </label>
+
+                <!-- YouTube 背景設定 -->
+                <input 
+                    type="text" 
+                    id="youtubeUrl" 
+                    placeholder="輸入 YouTube 網址或嵌入代碼"
+                    class="upload-label"
+                    style="width: 100%; padding: 5px; margin-top: 5px;"
+                >
+                <button onclick="setYoutubeBackground()" class="upload-label">
+                    設定影片背景
+                </button>
+                
+                <!-- 添加影片控制按鈕 -->
+                <div class="video-controls" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="playVideo()" class="upload-label">
+                        播放 ▶
+                    </button>
+                    <button onclick="pauseVideo()" class="upload-label">
+                        暫停 ⏸
+                    </button>
+                    <button onclick="toggleMute()" class="upload-label" id="muteButton">
+                        靜音 🔇
+                    </button>
+                </div>
+                
+                <button onclick="resetYoutubeBackground()" class="reset-btn">
+                    重設影片背景
+                </button>
             </div>
         </div>
     </div>
@@ -675,6 +716,54 @@
     window.addEventListener('load', () => {
         new SakuraEffect();
     });
+
+    function getYoutubeVideoId(url) {
+        // 處理不同格式的 YouTube URL
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function setYoutubeBackground() {
+        const url = document.getElementById('youtubeUrl').value;
+        const videoId = getYoutubeVideoId(url);
+        
+        if (!videoId) {
+            alert('請輸入有效的 YouTube 網址');
+            return;
+        }
+
+        // 創建 iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&loop=1&playlist=${videoId}&mute=1`;
+        iframe.allow = "autoplay";
+        iframe.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        `;
+
+        // 移除舊的背景
+        const oldIframe = document.querySelector('.canvas-container iframe');
+        if (oldIframe) {
+            oldIframe.remove();
+        }
+
+        // 添加新的背景
+        document.querySelector('.canvas-container').insertBefore(iframe, canvas);
+    }
+
+    function resetYoutubeBackground() {
+        const iframe = document.querySelector('.canvas-container iframe');
+        if (iframe) {
+            iframe.remove();
+        }
+        document.getElementById('youtubeUrl').value = '';
+    }
     </script>
 </body>
 </html> 

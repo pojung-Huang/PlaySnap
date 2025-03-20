@@ -50,6 +50,14 @@ let originalPosition = { x: 0, y: 0 };
 let clickCount = 0;
 let clickTimer = null;
 
+let youtubePlayer = null;
+let isMuted = false;
+
+// YouTube API 準備就緒時的回調函數
+function onYouTubeIframeAPIReady() {
+    console.log('YouTube API Ready');
+}
+
 class Snake {
     constructor() {
         this.positions = [{ x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) }];
@@ -975,3 +983,126 @@ document.addEventListener('DOMContentLoaded', () => {
     // 預設只顯示基本規則
     rulesContent.classList.remove('expanded');
 });
+
+function getYoutubeVideoId(input) {
+    // 處理 iframe 代碼
+    if (input.includes('iframe')) {
+        const srcMatch = input.match(/embed\/([^?"]+)/);
+        if (srcMatch && srcMatch[1]) {
+            return srcMatch[1];
+        }
+    }
+
+    // 處理一般 URL
+    const urlMatch = input.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+    if (urlMatch && urlMatch[1]) {
+        return urlMatch[1];
+    }
+
+    // 處理純 ID
+    if (input.match(/^[a-zA-Z0-9_-]{11}$/)) {
+        return input;
+    }
+
+    return null;
+}
+
+function setYoutubeBackground() {
+    const input = document.getElementById('youtubeUrl').value.trim();
+    const videoId = getYoutubeVideoId(input);
+
+    if (!videoId) {
+        alert('請輸入有效的 YouTube 網址或影片 ID');
+        return;
+    }
+
+    // 移除舊的播放器
+    const oldPlayer = document.getElementById('youtubePlayer');
+    if (oldPlayer) {
+        oldPlayer.remove();
+    }
+
+    // 創建容器
+    const playerDiv = document.createElement('div');
+    playerDiv.id = 'youtubePlayer';
+    playerDiv.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    `;
+
+    // 添加到畫布容器
+    const canvasContainer = document.querySelector('.canvas-container');
+    canvasContainer.insertBefore(playerDiv, canvasContainer.firstChild);
+
+    // 創建 YouTube 播放器
+    youtubePlayer = new YT.Player('youtubePlayer', {
+        videoId: videoId,
+        playerVars: {
+            'autoplay': 1,
+            'controls': 0,
+            'loop': 1,
+            'playlist': videoId,
+            'modestbranding': 1,
+            'mute': 0,
+            'origin': window.location.origin
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    console.log('Player Ready');
+    event.target.playVideo();
+}
+
+function onPlayerStateChange(event) {
+    console.log('Player State Changed:', event.data);
+}
+
+function onPlayerError(event) {
+    console.error('Player Error:', event.data);
+}
+
+// 播放控制函數
+function playVideo() {
+    if (youtubePlayer && youtubePlayer.playVideo) {
+        youtubePlayer.playVideo();
+    }
+}
+
+function pauseVideo() {
+    if (youtubePlayer && youtubePlayer.pauseVideo) {
+        youtubePlayer.pauseVideo();
+    }
+}
+
+function toggleMute() {
+    if (youtubePlayer) {
+        if (youtubePlayer.isMuted()) {
+            youtubePlayer.unMute();
+            document.getElementById('muteButton').textContent = '靜音 🔇';
+        } else {
+            youtubePlayer.mute();
+            document.getElementById('muteButton').textContent = '取消靜音 🔊';
+        }
+    }
+}
+
+// 重置功能
+function resetYoutubeBackground() {
+    const player = document.getElementById('youtubePlayer');
+    if (player) {
+        player.remove();
+    }
+    youtubePlayer = null;
+    document.getElementById('youtubeUrl').value = '';
+}
