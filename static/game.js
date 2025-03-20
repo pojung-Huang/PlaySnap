@@ -1037,3 +1037,16 @@ function resetYoutubeBackground() {
     youtubePlayer = null;
     document.getElementById('youtubeUrl').value = '';
 }
+
+function toggleRules() {
+    const content = document.getElementById('rulesContent');
+    const toggle = document.querySelector('.rules-toggle');
+
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        toggle.classList.remove('expanded');
+    } else {
+        content.style.display = 'block';
+        toggle.classList.add('expanded');
+    }
+}
