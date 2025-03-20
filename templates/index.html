@@ -15,7 +15,12 @@
             height: 100vh;
             overflow: hidden;
             background-color: #f0f0f0;
+            background-image: url('{{ url_for('static', filename='image/富士山03.jpg') }}');
+            background-size: cover;  /* 圖片覆蓋整個區域 */
+            background-position: center;  /* 圖片置中 */
+            background-repeat: no-repeat;  /* 圖片不重複 */
             font-family: Arial, sans-serif;
+            transition: background-image 1s ease-in-out;
         }
 
         body {
@@ -84,7 +89,7 @@
         .game-section {
             display: flex;
             gap: 2vw;
-            height: 85vh;
+            height: 85vh; /* 稍微縮小高度 */
             align-items: center;
         }
 
@@ -106,7 +111,7 @@
             width: 15vw;
             height: 85vh;
             padding: 2vh 1vw;
-            background: white;
+            background: rgba(255, 255, 255, 0.8); /* 將原本的 white 改為 80% 透明的白色 */
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
@@ -352,69 +357,6 @@
             color: #666;
         }
 
-        .bg-upload {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .upload-label, .reset-btn, .surrender-btn {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            text-align: center;
-            transition: background-color 0.3s;
-        }
-
-        .upload-label {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .upload-label:hover {
-            background: #45a049;
-        }
-
-        .reset-btn {
-            background: #f44336;
-            color: white;
-        }
-
-        .reset-btn:hover {
-            background: #da190b;
-        }
-
-        .surrender-btn {
-            background: #FFA500;
-            color: white;
-            position: relative;
-        }
-
-        .surrender-btn:hover {
-            background: #FF8C00;
-        }
-
-        .surrender-text {
-            position: absolute;
-            background: #FEFEFE;
-            padding: 5px 15px;
-            border-radius: 999px;
-            border: 1px dashed #777;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 5px;
-        }
-
-        .surrender-btn:hover + .surrender-text {
-            opacity: 1;
-        }
-
         .game-rules {
             margin-top: 20px;
         }
@@ -577,7 +519,7 @@
     <!-- 添加設定彈出視窗 - 放在 container 之前 -->
     <div class="settings-box" id="settingsBox">
         <a class="boxclose" id="boxclose">×</a>
-        <h1>遊戲設定</h1>
+        <h1>其他設定</h1>
         <div class="settings-content">
             <div class="bg-upload">
                 <!-- 背景圖片設定 - 並排 -->
@@ -631,6 +573,26 @@
                         <span class="snake-icon">🐍</span>
                         <span class="button-text">開始遊戲</span>
                     </button>
+                </div>
+                <!-- 在 canvas-container 下方添加輪播 -->
+                <div class="game-slideshow">
+                    <div class="slide fade">
+                        <img src="{{ url_for('static', filename='image/富士山01.jpg') }}" alt="富士山1">
+                    </div>
+                    <div class="slide fade">
+                        <img src="{{ url_for('static', filename='image/富士山02.jpg') }}" alt="富士山2">
+                    </div>
+                    <div class="slide fade">
+                        <img src="{{ url_for('static', filename='image/富士山03.jpg') }}" alt="富士山3">
+                    </div>
+                    <div class="slide fade">
+                        <img src="{{ url_for('static', filename='image/富士山04.jpg') }}" alt="富士山4">
+                    </div>
+                    <div class="slide fade">
+                        <img src="{{ url_for('static', filename='image/富士山05.jpg') }}" alt="富士山5">
+                    </div>
+                    <button class="slide-btn prev" onclick="changeSlide(-1)">❮</button>
+                    <button class="slide-btn next" onclick="changeSlide(1)">❯</button>
                 </div>
             </div>
             <div class="game-controls">
@@ -838,6 +800,28 @@
             modal.style.display = 'none';
         }
     }
+
+    // 添加背景輪替功能
+    const backgrounds = [
+        "{{ url_for('static', filename='image/富士山01.jpg') }}",
+        "{{ url_for('static', filename='image/富士山02.jpg') }}",
+        "{{ url_for('static', filename='image/富士山03.jpg') }}",
+        "{{ url_for('static', filename='image/富士山04.jpg') }}",
+        "{{ url_for('static', filename='image/富士山05.jpg') }}"
+    ];
+
+    let currentBgIndex = 0;
+
+    function changeBackground() {
+        currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
+        document.body.style.backgroundImage = `url('${backgrounds[currentBgIndex]}')`;
+    }
+
+    // 初始化背景
+    document.body.style.backgroundImage = `url('${backgrounds[0]}')`;
+
+    // 每10秒切換一次背景
+    setInterval(changeBackground, 10000);
     </script>
 </body>
 </html> 
