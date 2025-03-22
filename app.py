@@ -45,6 +45,7 @@ def index():
 
 @app.route('/api/leaderboard', methods=['GET'])
 def get_leaderboard():
+    print("======================== GET/api/leaderboard ========================= ")
     # 獲取前10名最高分
     top_scores = Score.query.order_by(Score.score.desc()).limit(10).all()
     
@@ -57,6 +58,7 @@ def get_leaderboard():
 
 @app.route('/api/leaderboard', methods=['POST'])
 def add_score():
+    print("======================== POST/api/leaderboard ========================= ")
     data = request.json
     if 'name' in data and 'score' in data and 'length' in data:
         # 添加新分數
