@@ -1,6 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
+const lengthElement = document.getElementById('lengthValue');
 const startButton = document.querySelector('.start-button-container');
 const surrenderBtn = document.getElementById('surrenderBtn');
 const surrenderText = document.getElementById('surrenderText');
@@ -255,8 +256,8 @@ class Food {
         this.specialFruits = [
             {
                 emoji: '⚡',
-                score: 500,
-                threshold: 2000,
+                score: 100,
+                threshold: 1200,
                 special: 'speed',
                 effect: () => {
                     new SpecialEffect('⚡'); // 添加特效
@@ -270,7 +271,7 @@ class Food {
             },
             {
                 emoji: '🌟',
-                score: 200,
+                score: 100,
                 threshold: 1000,
                 special: 'grow',
                 effect: () => {
@@ -285,8 +286,11 @@ class Food {
                 special: 'shrink',
                 effect: () => {
                     new SpecialEffect('✂️'); // 添加特效
-                    snake.length = Math.max(1, Math.floor(snake.length / 10));
+                    snake.length = Math.max(1, Math.floor(snake.length * 0.85));
                     snake.positions = snake.positions.slice(0, snake.length);
+
+                    // 更新長度顯示
+                    document.getElementById('lengthValue').textContent = snake.length;
                 }
             }
         ];
@@ -358,6 +362,10 @@ function startGame() {
     score = 0;
     scoreElement.textContent = score;
 
+    // 初始化長度顯示
+    const lengthElement = document.getElementById('lengthValue');
+    lengthElement.textContent = snake.length;
+
     console.log('初始化完成');
     console.log('蛇的位置:', snake.positions);
     console.log('食物位置:', food.position);
@@ -371,17 +379,50 @@ async function updateLeaderboard() {
         const response = await fetch('/api/leaderboard');
         const leaderboard = await response.json();
         const leaderboardList = document.querySelector('.leaderboard-list');
+
         leaderboardList.innerHTML = leaderboard
-            .map((entry, index) => `
-                <li class="leaderboard-item">
-                    <div>
-                        <span>${index + 1}. ${entry.name}</span>
-                        <span class="leaderboard-date">${entry.date}</span>
-                    </div>
-                    <span>${entry.score}分</span>
-                </li>
-            `)
+            .map((entry, index) => {
+                // 決定排名圖標和樣式
+                let rankIcon;
+                let rankClass;
+                let rankNumber = index + 1;  // 保留排名數字
+
+                if (index === 0) {
+                    rankIcon = '🥇';
+                    rankClass = 'rank-gold';
+                } else if (index === 1) {
+                    rankIcon = '🥈';
+                    rankClass = 'rank-silver';
+                } else if (index === 2) {
+                    rankIcon = '🥉';
+                    rankClass = 'rank-bronze';
+                } else {
+                    // 第四名之後使用獎牌+序數後綴
+                    const suffix = 'ᵗʰ';  // 預設後綴
+                    rankIcon = `🏅${rankNumber}${suffix}`;
+                    rankClass = '';
+                }
+
+                return `
+                    <li class="leaderboard-item ${rankClass}">
+                        <div>
+                            <span class="rank-icon ${rankClass}">${rankIcon}</span>
+                            <span>${entry.name}</span>
+                        </div>
+                        <span>${entry.score}分 長度: ${entry.length}</span>
+                    </li>
+                `;
+            })
             .join('');
+
+        // 更新當前玩家的分數和排名
+        if (snake) {
+            const currentScore = score;
+            const currentRank = leaderboard.findIndex(entry => entry.score < currentScore) + 1;
+            document.getElementById('currentRank').textContent =
+                currentRank > 0 ? currentRank : leaderboard.length + 1;
+        }
+
     } catch (error) {
         console.error('更新排行榜失敗:', error);
     }
@@ -396,9 +437,13 @@ async function submitScore(score) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, score }),
+                body: JSON.stringify({
+                    name,
+                    score,
+                    length: snake.length  // 添加長度資訊
+                }),
             });
-            await updateLeaderboard();
+            await updateLeaderboard();  // 確保在提交分數後立即更新排行榜
         } catch (error) {
             console.error('提交分數失敗:', error);
         }
@@ -491,6 +536,10 @@ function update() {
         snake.length++; // 一般成長效果
         score += food.currentFruit.score;
         scoreElement.textContent = score;
+
+        // 更新長度顯示
+        document.getElementById('lengthValue').textContent = snake.length;
+
         food.randomize();
     }
 
@@ -552,9 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 添加結束遊戲函數
 function endGame() {
-    submitScore(score);
     if (gameLoop) {
         clearInterval(gameLoop);
+        submitScore(score);  // 提交分數
+        updateLeaderboard(); // 立即更新排行榜顯示
 
         // 添加一些有趣的效果
         const canvas = document.getElementById('gameCanvas');
@@ -578,6 +628,7 @@ function endGame() {
         food = null;
         score = 0;
         scoreElement.textContent = score;
+        lengthElement.textContent = length;
 
         // 顯示開始按鈕
         startButton.style.display = 'block';

@@ -15,6 +15,7 @@ class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     score = db.Column(db.Integer, nullable=False)
+    length = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 def init_db():
@@ -26,7 +27,7 @@ def init_db():
         if not Score.query.first():
             # 添加一些測試分數
             test_scores = [
-                Score(name="k8s", score=9999),
+                Score(name="user", score=10000, length=200),
                 # Score(name="測試玩家", score=80),
                 # Score(name="測試玩家", score=60)
             ]
@@ -50,17 +51,19 @@ def get_leaderboard():
     return jsonify([{
         'name': score.name,
         'score': score.score,
+        'length': score.length,
         'date': score.date.strftime('%Y-%m-%d %H:%M')
     } for score in top_scores])
 
 @app.route('/api/leaderboard', methods=['POST'])
 def add_score():
     data = request.json
-    if 'name' in data and 'score' in data:
+    if 'name' in data and 'score' in data and 'length' in data:
         # 添加新分數
         new_score = Score(
             name=data['name'],
-            score=data['score']
+            score=data['score'],
+            length=data['length']
         )
         db.session.add(new_score)
         db.session.commit()
