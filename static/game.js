@@ -54,11 +54,6 @@ let clickTimer = null;
 let youtubePlayer = null;
 let isMuted = false;
 
-// YouTube API 準備就緒時的回調函數
-function onYouTubeIframeAPIReady() {
-    console.log('YouTube API Ready');
-}
-
 class Snake {
     constructor() {
         this.positions = [{ x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) }];
@@ -257,7 +252,7 @@ class Food {
             {
                 emoji: '⚡',
                 score: 100,
-                threshold: 1200,
+                threshold: 360,
                 special: 'speed',
                 effect: () => {
                     new SpecialEffect('⚡'); // 添加特效
@@ -272,7 +267,7 @@ class Food {
             {
                 emoji: '🌟',
                 score: 100,
-                threshold: 1000,
+                threshold: 300,
                 special: 'grow',
                 effect: () => {
                     new SpecialEffect('🌟'); // 添加特效
@@ -282,7 +277,7 @@ class Food {
             {
                 emoji: '✂️',
                 score: 100,
-                threshold: 2000,
+                threshold: 600,
                 special: 'shrink',
                 effect: () => {
                     new SpecialEffect('✂️'); // 添加特效
@@ -360,7 +355,9 @@ function startGame() {
     snake = new Snake();
     food = new Food();
     score = 0;
+    console.log('分數000:', score);
     scoreElement.textContent = score;
+    console.log('分數:', score);
 
     // 初始化長度顯示
     const lengthElement = document.getElementById('lengthValue');
@@ -589,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // 確保按鈕一開始是可見的
     startButton.style.display = 'block';
-    initButtonPosition();
+    // initButtonPosition();
 
     const toggleGuidelines = document.getElementById('toggleGuidelines');
     if (toggleGuidelines) {
@@ -773,39 +770,111 @@ class SakuraEffect {
     }
 }
 
-// 全局點擊事件，讓設定視窗跟隨點擊位置
+
+// 全局點擊事件，讓 音樂設定 視窗跟隨點擊位置
 document.addEventListener('click', function (event) {
     // 如果點擊的不是設定視窗內的元素，且設定視窗已顯示
-    const settingsBox = document.getElementById('settingsBox');
-    if (!event.target.closest('#settingsBox') &&
-        settingsBox.style.top !== '-200px' &&
-        !event.target.closest('.settings-btn')) {
+    const musicSettingsBox = document.getElementById('MusicSettingsBox');
+    // 如果點擊的不是設定視窗內的元素，且設定視窗已顯示
+    if (!event.target.closest('#MusicSettingsBox') &&
+        musicSettingsBox.style.top !== '-200px' &&
+        !event.target.closest('.MusicSettingsBTN')) {
         // 移動設定視窗到新位置
-        settingsBox.style.left = (event.clientX - 225) + "px";
-        settingsBox.style.top = (event.clientY + 20) + "px";
+        musicSettingsBox.style.left = (event.clientX - 225) + "px";
+        musicSettingsBox.style.top = (event.clientY + 20) + "px";
     }
 });
 
-// 修改設定按鈕點擊事件
-document.querySelector('.settings-btn').addEventListener('click', function (event) {
-    const settingsBox = document.getElementById('settingsBox');
-    settingsBox.style.display = 'block';  // 顯示視窗
-    settingsBox.style.left = (event.clientX - 225) + "px";
-    settingsBox.style.top = (event.clientY + 20) + "px";
+// 修改 音樂設定 按鈕點擊事件
+document.querySelector('.MusicSettingsBTN').addEventListener('click', function (event) {
+    const musicSettingsBox = document.getElementById('MusicSettingsBox');
+    musicSettingsBox.style.display = 'block';  // 顯示視窗
+    musicSettingsBox.style.left = (event.clientX - 225) + "px";
+    musicSettingsBox.style.top = (event.clientY + 20) + "px";
     event.stopPropagation();
 });
 
-// 修改關閉按鈕點擊事件
-document.getElementById('boxclose').addEventListener('click', function (event) {
-    const settingsBox = document.getElementById('settingsBox');
+// 修改關閉 音樂設定 按鈕點擊事件
+document.getElementById('MusicSettingsBoxClose').addEventListener('click', function (event) {
+    const settingsBox = document.getElementById('MusicSettingsBox');
     settingsBox.style.display = 'none';  // 完全隱藏視窗
     event.stopPropagation();
 });
 
-// 防止點擊設定框內部時觸發移動
-document.getElementById('settingsBox').addEventListener('click', function (event) {
+// 防止點擊 音樂設定 框內部時觸發移動
+document.getElementById('MusicSettingsBoxClose').addEventListener('click', function (event) {
     event.stopPropagation();
 });
+
+
+// 全局點擊事件，讓 排行榜 視窗跟隨點擊位置
+document.addEventListener('click', function (event) {
+    // 如果點擊的不是設定視窗內的元素，且設定視窗已顯示
+    const leaderboardBox = document.getElementById('LeaderboardBox');
+    if (!event.target.closest('#LeaderboardBox') &&
+        leaderboardBox.style.top !== '-200px' &&
+        !event.target.closest('.LeaderboardBTN')) {
+        // 移動排行榜視窗到新位置
+        leaderboardBox.style.left = (event.clientX - 225) + "px";
+    }
+});
+
+// 修改 排行榜 按鈕點擊事件
+document.querySelector('.LeaderboardBTN').addEventListener('click', function (event) {
+    const leaderboardBox = document.getElementById('LeaderboardBox');
+    leaderboardBox.style.display = 'block';
+    leaderboardBox.style.left = (event.clientX - 225) + "px";
+    leaderboardBox.style.top = (event.clientY + 20) + "px";
+    event.stopPropagation();
+});
+
+// 修改關閉 排行榜 按鈕點擊事件
+document.getElementById('LeaderboardBoxClose').addEventListener('click', function (event) {
+    const leaderboardBox = document.getElementById('LeaderboardBox');
+    leaderboardBox.style.display = 'none';  // 完全隱藏視窗
+    event.stopPropagation();
+});
+
+// 防止點擊 排行榜 框內部時觸發移動
+document.getElementById('LeaderboardBox').addEventListener('click', function (event) {
+    event.stopPropagation();
+});
+
+// 全局點擊事件，讓 遊戲規則 視窗跟隨點擊位置
+document.addEventListener('click', function (event) {
+    // 如果點擊的不是設定視窗內的元素，且設定視窗已顯示
+    const gameRulesBox = document.getElementById('GameRulesBox');
+    if (!event.target.closest('#GameRulesBox') &&
+        gameRulesBox.style.top !== '-200px' &&
+        !event.target.closest('.GameRulesBTN')) {
+        // 移動遊戲規則視窗到新位置
+        gameRulesBox.style.left = (event.clientX - 225) + "px";
+    }
+});
+
+// 修改 遊戲規則 按鈕點擊事件
+document.querySelector('.GameRulesBTN').addEventListener('click', function (event) {
+    const gameRulesBox = document.getElementById('GameRulesBox');
+    gameRulesBox.style.display = 'block';
+    gameRulesBox.style.left = (event.clientX - 225) + "px";
+    gameRulesBox.style.top = (event.clientY + 20) + "px";
+    event.stopPropagation();
+});
+
+// 修改關閉 遊戲規則 按鈕點擊事件
+document.getElementById('GameRulesBoxClose').addEventListener('click', function (event) {
+    const gameRulesBox = document.getElementById('GameRulesBox');
+    gameRulesBox.style.display = 'none';  // 完全隱藏視窗
+    event.stopPropagation();
+});
+
+// 防止點擊 遊戲規則 框內部時觸發移動
+document.getElementById('GameRulesBox').addEventListener('click', function (event) {
+    event.stopPropagation();
+});
+
+
+
 
 // 保持原有的遊戲代碼不變
 class Game {
@@ -944,19 +1013,19 @@ document.querySelector('.snake-btn').addEventListener('click', (e) => {
 
 // 添加遊戲規則展開收合功能
 document.addEventListener('DOMContentLoaded', () => {
-    const rulesHeader = document.querySelector('.rules-header');
-    const rulesContent = document.querySelector('.rules-content');
-    const rulesToggle = document.querySelector('.rules-toggle');
+    // const rulesHeader = document.querySelector('.rules-header');
+    // const rulesContent = document.querySelector('.rules-content');
+    // const rulesToggle = document.querySelector('.rules-toggle');
     let isExpanded = false;
 
-    rulesHeader.addEventListener('click', () => {
-        isExpanded = !isExpanded;
-        rulesContent.classList.toggle('expanded', isExpanded);
-        rulesToggle.classList.toggle('expanded', isExpanded);
-    });
+    // rulesHeader.addEventListener('click', () => {
+    //     isExpanded = !isExpanded;
+    //     rulesContent.classList.toggle('expanded', isExpanded);
+    //     // rulesToggle.classList.toggle('expanded', isExpanded);
+    // });
 
     // 預設只顯示基本規則
-    rulesContent.classList.remove('expanded');
+    // rulesContent.classList.remove('expanded');
 });
 
 function getYoutubeVideoId(input) {
