@@ -252,7 +252,7 @@ class Food {
             {
                 emoji: '⚡',
                 score: 100,
-                threshold: 360,
+                threshold: 120,
                 special: 'speed',
                 effect: () => {
                     new SpecialEffect('⚡'); // 添加特效
@@ -267,7 +267,7 @@ class Food {
             {
                 emoji: '🌟',
                 score: 100,
-                threshold: 300,
+                threshold: 100,
                 special: 'grow',
                 effect: () => {
                     new SpecialEffect('🌟'); // 添加特效
@@ -277,7 +277,7 @@ class Food {
             {
                 emoji: '✂️',
                 score: 100,
-                threshold: 600,
+                threshold: 200,
                 special: 'shrink',
                 effect: () => {
                     new SpecialEffect('✂️'); // 添加特效
