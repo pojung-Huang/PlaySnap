@@ -153,6 +153,7 @@ class Snake {
     }
 }
 
+// 新增特殊水果特效
 class SpecialEffect {
     constructor(emoji) {
         this.active = true;
@@ -232,6 +233,7 @@ class SpecialEffect {
     }
 }
 
+// 新增食物類別
 class Food {
     constructor() {
         this.position = { x: 0, y: 0 };
@@ -344,6 +346,7 @@ class Food {
     }
 }
 
+// 新增遊戲開始函數
 function startGame() {
     console.log('開始遊戲');
     startButton.style.display = 'none';
@@ -425,6 +428,7 @@ async function updateLeaderboard() {
     }
 }
 
+// 新增提交分數函數
 async function submitScore(score) {
     const name = prompt('恭喜！請輸入您的名字：');
     if (name) {
@@ -470,6 +474,7 @@ function resetBackground() {
     update();
 }
 
+// 新增輔助線繪製函數
 function drawGuidelines() {
     if (!showGuidelines) return;
 
@@ -545,6 +550,7 @@ function update() {
     food.draw();
 }
 
+// 新增按鍵事件處理
 document.addEventListener('keydown', (event) => {
     const key = event.key;
     const direction = snake.direction;
@@ -877,14 +883,14 @@ document.getElementById('GameRulesBox').addEventListener('click', function (even
 
 
 // 保持原有的遊戲代碼不變
-class Game {
-    // ... 原有的遊戲代碼 ...
-}
+// class Game {
+// ... 原有的遊戲代碼 ...
+// }
 
 // 初始化
-document.addEventListener('DOMContentLoaded', () => {
-    const game = new Game();
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     const game = new Game();
+// });
 
 // 添加蛇按鈕特效類
 class SnakeEffect {
@@ -1012,21 +1018,21 @@ document.querySelector('.snake-btn').addEventListener('click', (e) => {
 });
 
 // 添加遊戲規則展開收合功能
-document.addEventListener('DOMContentLoaded', () => {
-    // const rulesHeader = document.querySelector('.rules-header');
-    // const rulesContent = document.querySelector('.rules-content');
-    // const rulesToggle = document.querySelector('.rules-toggle');
-    let isExpanded = false;
+// document.addEventListener('DOMContentLoaded', () => {
+// const rulesHeader = document.querySelector('.rules-header');
+// const rulesContent = document.querySelector('.rules-content');
+// const rulesToggle = document.querySelector('.rules-toggle');
+// let isExpanded = false;
 
-    // rulesHeader.addEventListener('click', () => {
-    //     isExpanded = !isExpanded;
-    //     rulesContent.classList.toggle('expanded', isExpanded);
-    //     // rulesToggle.classList.toggle('expanded', isExpanded);
-    // });
+// rulesHeader.addEventListener('click', () => {
+//     isExpanded = !isExpanded;
+//     rulesContent.classList.toggle('expanded', isExpanded);
+//     // rulesToggle.classList.toggle('expanded', isExpanded);
+// });
 
-    // 預設只顯示基本規則
-    // rulesContent.classList.remove('expanded');
-});
+// 預設只顯示基本規則
+// rulesContent.classList.remove('expanded');
+// });
 
 function getYoutubeVideoId(input) {
     // 處理 iframe 代碼
