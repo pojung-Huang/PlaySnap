@@ -3,9 +3,7 @@ const ctx = canvas.getContext('2d');
 const scoreElement = document.getElementById('scoreValue');
 const lengthElement = document.getElementById('lengthValue');
 const startButton = document.querySelector('.start-button-container');
-const surrenderBtn = document.getElementById('surrenderBtn');
-const surrenderText = document.getElementById('surrenderText');
-let showGuidelines = true; // 新增輔助線控制變數
+
 
 // 設置畫布大小
 function resizeCanvas() {
@@ -24,37 +22,23 @@ window.addEventListener('resize', () => {
         snake.draw();
         food.draw();
     }
-    initButtonPosition();
 });
 
-const GRID_SIZE = Math.floor(canvas.height / 30); // 動態計算網格大小
+const GRID_SIZE = Math.floor(canvas.height / 30);
 const GRID_WIDTH = Math.floor(canvas.width / GRID_SIZE);
 const GRID_HEIGHT = Math.floor(canvas.height / GRID_SIZE);
-
-let backgroundImage = null;
-const COLORS = {
-    SNAKE: 'rgba(0, 255, 0, 0.8)',  // 半透明綠色
-    FOOD: 'rgba(255, 0, 0, 0.8)',   // 半透明紅色
-    BACKGROUND: 'rgba(0, 0, 0, 0.5)' // 半透明黑色
-};
 
 let snake = null;
 let food = null;
 let gameLoop = null;
 let score = 0;
-let currentPlayer = null;
-const defaultBackground = COLORS.BACKGROUND;
-let isRunning = false;
-let originalPosition = { x: 0, y: 0 };
-
-// 添加點擊計數器和計時器
-let clickCount = 0;
-let clickTimer = null;
 
 let youtubePlayer = null;
 let isMuted = false;
 
+// 蛇類 顏色&方向
 class Snake {
+    // 初始化 位置&方向&長度&是否改變方向&身體顏色
     constructor() {
         this.positions = [{ x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) }];
         this.direction = { x: 1, y: 0 };
@@ -73,6 +57,7 @@ class Snake {
     update() {
         this.isChangingDirection = false;
 
+        // 更新蛇頭位置
         const head = this.positions[0];
         const newHead = {
             x: (head.x + this.direction.x + GRID_WIDTH) % GRID_WIDTH,
@@ -84,6 +69,7 @@ class Snake {
             return false;
         }
 
+        // 更新蛇的位置
         this.positions.unshift(newHead);
         if (this.positions.length > this.length) {
             this.positions.pop();
@@ -91,10 +77,12 @@ class Snake {
         return true;
     }
 
+    // 繪製蛇
     draw() {
         // 確保有正確的繪圖上下文
         if (!ctx) return;
 
+        // 繪製蛇身
         this.positions.forEach((pos, index) => {
             const x = pos.x * GRID_SIZE;
             const y = pos.y * GRID_SIZE;
@@ -155,6 +143,7 @@ class Snake {
 
 // 新增特殊水果特效
 class SpecialEffect {
+    // 初始化 特效&容器&動畫&粒子&特效
     constructor(emoji) {
         this.active = true;
         this.emoji = emoji;
@@ -186,6 +175,7 @@ class SpecialEffect {
         }, 5000);
     }
 
+    // 創建粒子
     createParticle() {
         if (!this.active) return;
 
@@ -225,6 +215,7 @@ class SpecialEffect {
         this.container.appendChild(particle);
     }
 
+    // 動畫
     animate() {
         if (this.active && Math.random() < 0.3) {
             this.createParticle();
@@ -235,6 +226,7 @@ class SpecialEffect {
 
 // 新增食物類別
 class Food {
+    // 初始化 位置&水果&特殊水果
     constructor() {
         this.position = { x: 0, y: 0 };
         // 設定一般水果
@@ -296,6 +288,7 @@ class Food {
         this.randomize();
     }
 
+    // 水果出現全重控制
     getRandomFruit() {
         // 合併可用的普通水果和特殊水果
         const availableFruits = this.fruits.filter(fruit => score >= fruit.threshold);
@@ -326,12 +319,14 @@ class Food {
         return availableFruits[0];
     }
 
+    // 隨機選擇水果
     randomize() {
         this.position.x = Math.floor(Math.random() * GRID_WIDTH);
         this.position.y = Math.floor(Math.random() * GRID_HEIGHT);
         this.currentFruit = this.getRandomFruit();
     }
 
+    // 繪製水果
     draw() {
         if (!ctx) return;
 
@@ -374,6 +369,7 @@ function startGame() {
     gameLoop = setInterval(update, 100);
 }
 
+// 更新排行榜
 async function updateLeaderboard() {
     try {
         const response = await fetch('/api/leaderboard');
@@ -451,33 +447,8 @@ async function submitScore(score) {
     }
 }
 
-// 添加背景圖片處理函數
-function handleBackgroundImage(file) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        backgroundImage = new Image();
-        backgroundImage.src = e.target.result;
-
-        // 儲存到 localStorage
-        localStorage.setItem('snakeGameBg', e.target.result);
-
-        // 重繪畫面
-        update();
-    };
-    reader.readAsDataURL(file);
-}
-
-// 重設背景函數
-function resetBackground() {
-    backgroundImage = null;
-    localStorage.removeItem('snakeGameBg');
-    update();
-}
-
 // 新增輔助線繪製函數
 function drawGuidelines() {
-    if (!showGuidelines) return;
-
     ctx.save();
     ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
     ctx.lineWidth = 1;
@@ -507,14 +478,8 @@ function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 2. 繪製背景
-    if (backgroundImage) {
-        // 繪製背景圖
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-    } else {
-        // 使用預設背景色
-        ctx.fillStyle = defaultBackground;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGuidelines(); // 添加輔助線繪製
 
@@ -553,6 +518,7 @@ function update() {
 // 新增按鍵事件處理
 document.addEventListener('keydown', (event) => {
     const key = event.key;
+    console.log('按鍵', snake.direction);
     const direction = snake.direction;
 
     if (snake.isChangingDirection) return;
@@ -592,7 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // 確保按鈕一開始是可見的
     startButton.style.display = 'block';
-    // initButtonPosition();
 
     const toggleGuidelines = document.getElementById('toggleGuidelines');
     if (toggleGuidelines) {
@@ -705,10 +670,12 @@ class SakuraEffect {
         this.animate();
     }
 
+    // 更新遊戲區域
     updateGameArea() {
         this.gameArea = this.gameCanvas.getBoundingClientRect();
     }
 
+    // 創建櫻花
     createSakura() {
         if (!this.active) return;
 
@@ -758,6 +725,7 @@ class SakuraEffect {
         this.container.appendChild(sakura);
     }
 
+    // 櫻花動畫
     animate() {
         if (this.active && Math.random() < 0.2) {
             this.createSakura();
@@ -765,6 +733,7 @@ class SakuraEffect {
         requestAnimationFrame(this.boundAnimate);
     }
 
+    // 櫻花開關
     toggle() {
         this.active = !this.active;
         if (!this.active) {
@@ -806,12 +775,6 @@ document.getElementById('MusicSettingsBoxClose').addEventListener('click', funct
     settingsBox.style.display = 'none';  // 完全隱藏視窗
     event.stopPropagation();
 });
-
-// 防止點擊 音樂設定 框內部時觸發移動
-document.getElementById('MusicSettingsBoxClose').addEventListener('click', function (event) {
-    event.stopPropagation();
-});
-
 
 // 全局點擊事件，讓 排行榜 視窗跟隨點擊位置
 document.addEventListener('click', function (event) {
@@ -879,21 +842,9 @@ document.getElementById('GameRulesBox').addEventListener('click', function (even
     event.stopPropagation();
 });
 
-
-
-
-// 保持原有的遊戲代碼不變
-// class Game {
-// ... 原有的遊戲代碼 ...
-// }
-
-// 初始化
-// document.addEventListener('DOMContentLoaded', () => {
-//     const game = new Game();
-// });
-
 // 添加蛇按鈕特效類
 class SnakeEffect {
+    // 初始化 容器&特效&計數器
     constructor() {
         this.container = document.createElement('div');
         this.container.style.cssText = `
@@ -913,6 +864,7 @@ class SnakeEffect {
         }, 8000);
     }
 
+    // 創建蛇
     createSnake(x, y) {
         const snake = document.createElement('div');
         snake.textContent = '🐍';
@@ -1017,23 +969,7 @@ document.querySelector('.snake-btn').addEventListener('click', (e) => {
     createSnakes();
 });
 
-// 添加遊戲規則展開收合功能
-// document.addEventListener('DOMContentLoaded', () => {
-// const rulesHeader = document.querySelector('.rules-header');
-// const rulesContent = document.querySelector('.rules-content');
-// const rulesToggle = document.querySelector('.rules-toggle');
-// let isExpanded = false;
-
-// rulesHeader.addEventListener('click', () => {
-//     isExpanded = !isExpanded;
-//     rulesContent.classList.toggle('expanded', isExpanded);
-//     // rulesToggle.classList.toggle('expanded', isExpanded);
-// });
-
-// 預設只顯示基本規則
-// rulesContent.classList.remove('expanded');
-// });
-
+// 獲取 YouTube 影片 ID
 function getYoutubeVideoId(input) {
     // 處理 iframe 代碼
     if (input.includes('iframe')) {
@@ -1057,6 +993,7 @@ function getYoutubeVideoId(input) {
     return null;
 }
 
+// 設置 YouTube 背景
 function setYoutubeBackground() {
     const input = document.getElementById('youtubeUrl').value.trim();
     const videoId = getYoutubeVideoId(input);
@@ -1114,10 +1051,12 @@ function onPlayerReady(event) {
     event.target.playVideo();
 }
 
+// 播放狀態改變
 function onPlayerStateChange(event) {
     console.log('Player State Changed:', event.data);
 }
 
+// 播放錯誤
 function onPlayerError(event) {
     console.error('Player Error:', event.data);
 }
@@ -1129,12 +1068,14 @@ function playVideo() {
     }
 }
 
+// 暫停影片
 function pauseVideo() {
     if (youtubePlayer && youtubePlayer.pauseVideo) {
         youtubePlayer.pauseVideo();
     }
 }
 
+// 靜音開關
 function toggleMute() {
     if (youtubePlayer) {
         if (youtubePlayer.isMuted()) {
@@ -1147,7 +1088,7 @@ function toggleMute() {
     }
 }
 
-// 重置功能
+// 重置 YouTube 背景
 function resetYoutubeBackground() {
     const player = document.getElementById('youtubePlayer');
     if (player) {
@@ -1155,17 +1096,4 @@ function resetYoutubeBackground() {
     }
     youtubePlayer = null;
     document.getElementById('youtubeUrl').value = '';
-}
-
-function toggleRules() {
-    const content = document.getElementById('rulesContent');
-    const toggle = document.querySelector('.rules-toggle');
-
-    if (content.style.display === 'block') {
-        content.style.display = 'none';
-        toggle.classList.remove('expanded');
-    } else {
-        content.style.display = 'block';
-        toggle.classList.add('expanded');
-    }
 }
